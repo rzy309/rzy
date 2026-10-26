@@ -1,0 +1,416 @@
+<!-- 姓名：荣子祎，日期：2026-10-26，功能：JavaScript 条件与循环演示 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-2 JavaScript 条件与循环 - 荣子祎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "Consolas", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: #333;
+        }
+
+        .rzy_container { max-width: 1000px; margin: 0 auto; }
+
+        .rzy_header {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 24px;
+        }
+        .rzy_title { font-size: 30px; font-weight: bold; margin-bottom: 6px; }
+        .rzy_subtitle { font-size: 15px; opacity: 0.85; }
+
+        .rzy_section {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .rzy_section-title {
+            background: linear-gradient(90deg, #0984e3, #6c5ce7);
+            color: #fff;
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .rzy_section-body { padding: 18px 20px; }
+
+        .rzy_code {
+            background: #2d3436;
+            color: #ffeaa7;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            white-space: pre;
+            margin-bottom: 12px;
+        }
+
+        .rzy_controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .rzy_btn {
+            padding: 8px 18px;
+            background: #0984e3;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .rzy_btn:hover { background: #0770c2; }
+        .rzy_btn:active { transform: scale(0.97); }
+        .rzy_btn.rzy_btn-alt { background: #00b894; }
+        .rzy_btn.rzy_btn-alt:hover { background: #00a381; }
+
+        .rzy_input {
+            padding: 7px 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            width: 120px;
+        }
+        .rzy_input:focus { border-color: #0984e3; }
+
+        .rzy_output {
+            background: #f8f9fa;
+            border: 2px dashed #b2bec3;
+            border-radius: 8px;
+            padding: 14px;
+            min-height: 40px;
+            font-family: "Consolas", monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #2d3436;
+        }
+
+        .rzy_output .rzy_tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin: 2px 3px 2px 0;
+        }
+        .rzy_tag.rzy_odd { background: #ffeaa7; color: #d63031; }
+        .rzy_tag.rzy_even { background: #dfefff; color: #0984e3; }
+        .rzy_tag.rzy_bomb { background: #fab1a0; color: #d63031; text-decoration: line-through; }
+
+        .zy_row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        .rzy_footer {
+            text-align: center;
+            color: #fff;
+            margin-top: 24px;
+            font-size: 14px;
+        }
+        .rzy_back {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 22px;
+            background: #fff;
+            color: #6c5ce7;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .rzy_back:hover { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <div class="rzy_container">
+        <div class="rzy_header">
+            <h1 class="rzy_title">JavaScript 程序结构</h1>
+            <div class="rzy_subtitle">条件 判断 · 循环 遍历 — 荣子祎</div>
+        </div>
+
+        <!-- ========== 一、条件语句 ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">一、条件语句（if / else if / else / switch）</div>
+            <div class="rzy_section-body">
+                <div class="rzy_code">// if - else if - else ：根据分数评级
+function rzy_getGrade(score) {
+    if (score >= 90) return 'A（优秀）';
+    else if (score >= 80) return 'B（良好）';
+    else if (score >= 70) return 'C（中等）';
+    else if (score >= 60) return 'D（及格）';
+    else return 'E（不及格）';
+}
+
+// switch ：根据数字输出星期
+switch (day) {
+    case 1: console.log('周一'); break;
+    case 2: console.log('周二'); break;
+    ...
+    default: console.log('输入有误');
+}</div>
+
+                <div class="rzy_controls">
+                    <label>输入分数：</label>
+                    <input type="number" class="rzy_input" id="rzy_scoreInput" value="85" min="0" max="100">
+                    <button class="rzy_btn" onclick="rzy_runGrade()">评级（if-else）</button>
+
+                    <label style="margin-left:20px">输入星期(1-7)：</label>
+                    <input type="number" class="rzy_input" id="rzy_dayInput" value="3" min="1" max="7">
+                    <button class="rzy_btn rzy_btn-alt" onclick="rzy_runSwitch()">查星期（switch）</button>
+                </div>
+
+                <div class="rzy_output" id="rzy_output1">等待运行…</div>
+            </div>
+        </div>
+
+        <!-- ========== 二、for 循环 ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">二、for 循环 — 数7游戏（1~30）</div>
+            <div class="rzy_section-body">
+                <div class="rzy_code">// 数7规则：7的倍数 或 末尾是7 → 踩雷
+var rzy_result = [];
+for (var i = 1; i <= 30; i++) {
+    if (i % 7 === 0 || i % 10 === 7) {
+        rzy_result.push('💥');   // 踩雷
+    } else {
+        rzy_result.push(i);       // 正常输出数字
+    }
+}
+console.log(rzy_result);</div>
+
+                <div class="rzy_controls">
+                    <button class="rzy_btn" onclick="rzy_runFor()">运行 for 循环</button>
+                    <button class="rzy_btn rzy_btn-alt" onclick="rzy_runForOddEven()">奇数/偶数分类</button>
+                </div>
+
+                <div class="rzy_output" id="rzy_output2">等待运行…</div>
+            </div>
+        </div>
+
+        <!-- ========== 三、while / do-while ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">三、while / do-while — 猜数字（模拟）</div>
+            <div class="rzy_section-body">
+                <div class="rzy_code">// while ：累加直到和 >= 100
+var rzy_sum = 0, rzy_n = 1;
+while (rzy_sum < 100) {
+    rzy_sum += rzy_n;
+    rzy_n++;
+}
+
+// do-while ：至少执行一次后再判断
+do {
+    // 提示输入
+} while (rzy_input !== 'quit');</div>
+
+                <div class="rzy_controls">
+                    <button class="rzy_btn" onclick="rzy_runWhile()">累加至和 ≥ 100</button>
+                    <button class="rzy_btn rzy_btn-alt" onclick="rzy_runDowhile()">dowhile：打印 1~5</button>
+                </div>
+
+                <div class="rzy_output" id="rzy_output3">等待运行…</div>
+            </div>
+        </div>
+
+        <!-- ========== 四、for...of / for...in ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">四、for...of（遍历数组）/ for...in（遍历对象键）</div>
+            <div class="rzy_section-body">
+                <div class="rzy_code">// for...of ：遍历数组元素
+var rzy_colors = ['红', '橙', '黄', '绿', '蓝'];
+for (var color of rzy_colors) {
+    console.log(color);
+}
+
+// for...in ：遍历对象属性
+var rzy_student = { name: '荣子祎', age: 20, major: '前端' };
+for (var key in rzy_student) {
+    console.log(key + ' = ' + rzy_student[key]);
+}</div>
+
+                <div class="rzy_controls">
+                    <button class="rzy_btn" onclick="rzy_runForOf()">for...of 遍历数组</button>
+                    <button class="rzy_btn rzy_btn-alt" onclick="rzy_runForIn()">for...in 遍历对象</button>
+                </div>
+
+                <div class="rzy_output" id="rzy_output4">等待运行…</div>
+            </div>
+        </div>
+
+        <!-- ========== 五、综合：break / continue ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">五、break（跳出）/ continue（跳过）综合</div>
+            <div class="rzy_section-body">
+                <div class="rzy_code">// continue ：跳过偶数，只打印 1~20 内的奇数
+for (var i = 1; i <= 20; i++) {
+    if (i % 2 === 0) continue;   // 跳过本次
+    console.log(i);
+}
+
+// break ：找到第一个 > 100 且是 7 的倍数就停止
+for (var i = 101; ; i++) {
+    if (i % 7 === 0) {
+        console.log('找到：' + i);
+        break;                    // 立即跳出
+    }
+}</div>
+
+                <div class="rzy_controls">
+                    <button class="rzy_btn" onclick="rzy_runContinue()">continue：只输出奇数</button>
+                    <button class="rzy_btn rzy_btn-alt" onclick="rzy_runBreak()">break：第一个>100的7倍数</button>
+                </div>
+
+                <div class="rzy_output" id="rzy_output5">等待运行…</div>
+            </div>
+        </div>
+
+        <div class="rzy_footer">
+            页面作者：荣子祎 · 2026-10-26
+            <br>
+            <a href="index.html" class="rzy_back">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        /* ========== 一、条件语句 ========== */
+        function rzy_getGrade(score) {
+            if (score >= 90) return 'A（优秀）';
+            else if (score >= 80) return 'B（良好）';
+            else if (score >= 70) return 'C（中等）';
+            else if (score >= 60) return 'D（及格）';
+            else return 'E（不及格）';
+        }
+
+        function rzy_runGrade() {
+            var rzy_score = parseInt(document.getElementById('rzy_scoreInput').value);
+            var rzy_res = rzy_getGrade(rzy_score);
+            document.getElementById('rzy_output1').textContent =
+                '输入分数：' + rzy_score + '\n评级结果：' + rzy_res;
+        }
+
+        function rzy_runSwitch() {
+            var rzy_day = parseInt(document.getElementById('rzy_dayInput').value);
+            var rzy_weekName;
+            switch (rzy_day) {
+                case 1: rzy_weekName = '周一'; break;
+                case 2: rzy_weekName = '周二'; break;
+                case 3: rzy_weekName = '周三'; break;
+                case 4: rzy_weekName = '周四'; break;
+                case 5: rzy_weekName = '周五'; break;
+                case 6: rzy_weekName = '周六'; break;
+                case 7: rzy_weekName = '周日'; break;
+                default: rzy_weekName = '输入有误（请 1~7）';
+            }
+            document.getElementById('rzy_output1').textContent =
+                '输入：' + rzy_day + ' → ' + rzy_weekName;
+        }
+
+        /* ========== 二、for 循环 ========== */
+        function rzy_runFor() {
+            var rzy_html = '';
+            for (var i = 1; i <= 30; i++) {
+                if (i % 7 === 0 || i % 10 === 7) {
+                    rzy_html += '<span class="rzy_tag rzy_bomb">' + i + ' 💥</span>';
+                } else {
+                    rzy_html += '<span class="rzy_tag">' + i + '</span>';
+                }
+            }
+            document.getElementById('rzy_output2').innerHTML =
+                '1~30 数7游戏（虚线表示踩雷）：\n' + rzy_html;
+        }
+
+        function rzy_runForOddEven() {
+            var rzy_odd = '', rzy_even = '';
+            for (var i = 1; i <= 20; i++) {
+                if (i % 2 === 1) rzy_odd += '<span class="rzy_tag rzy_odd">' + i + '</span>';
+                else             rzy_even += '<span class="rzy_tag rzy_even">' + i + '</span>';
+            }
+            document.getElementById('rzy_output2').innerHTML =
+                '奇数：' + rzy_odd + '\n偶数：' + rzy_even;
+        }
+
+        /* ========== 三、while / do-while ========== */
+        function rzy_runWhile() {
+            var rzy_sum = 0, rzy_n = 1, rzy_steps = [];
+            while (rzy_sum < 100) {
+                rzy_steps.push('n=' + rzy_n + '  sum=' + rzy_sum + '+' + rzy_n + '=' + (rzy_sum + rzy_n));
+                rzy_sum += rzy_n;
+                rzy_n++;
+            }
+            rzy_steps.push('结束：sum=' + rzy_sum + '，共累加 ' + (rzy_n - 1) + ' 个自然数');
+            document.getElementById('rzy_output3').textContent = rzy_steps.join('\n');
+        }
+
+        function rzy_runDowhile() {
+            var rzy_log = [], i = 1;
+            do {
+                rzy_log.push('i = ' + i);
+                i++;
+            } while (i <= 5);
+            document.getElementById('rzy_output3').textContent =
+                'do-while 至少执行一次：\n' + rzy_log.join('\n');
+        }
+
+        /* ========== 四、for...of / for...in ========== */
+        function rzy_runForOf() {
+            var rzy_colors = ['红', '橙', '黄', '绿', '蓝', '靛', '紫'];
+            var rzy_log = [];
+            for (var rzy_c of rzy_colors) {
+                rzy_log.push('✦ ' + rzy_c);
+            }
+            document.getElementById('rzy_output4').textContent =
+                'for...of 遍历数组元素：\n' + rzy_log.join('\n');
+        }
+
+        function rzy_runForIn() {
+            var rzy_student = { name: '荣子祎', age: 20, major: '前端开发', hobby: '编程' };
+            var rzy_log = [];
+            for (var rzy_k in rzy_student) {
+                rzy_log.push(rzy_k + '  →  ' + rzy_student[rzy_k]);
+            }
+            document.getElementById('rzy_output4').textContent =
+                'for...in 遍历对象键：\n' + rzy_log.join('\n');
+        }
+
+        /* ========== 五、break / continue ========== */
+        function rzy_runContinue() {
+            var rzy_log = [];
+            for (var i = 1; i <= 20; i++) {
+                if (i % 2 === 0) continue;  // 跳过偶数
+                rzy_log.push(i);
+            }
+            document.getElementById('rzy_output5').textContent =
+                'continue 跳过偶数，输出 1~20 的奇数：\n' + rzy_log.join(', ');
+        }
+
+        function rzy_runBreak() {
+            var rzy_found = -1, rzy_steps = 0;
+            for (var i = 101; i < 1000; i++) {
+                rzy_steps++;
+                if (i % 7 === 0) {
+                    rzy_found = i;
+                    break;
+                }
+            }
+            document.getElementById('rzy_output5').textContent =
+                'break 立即跳出：\n第一个 > 100 且是 7 的倍数的数 = ' + rzy_found +
+                '\n循环次数 = ' + rzy_steps;
+        }
+    </script>
+</body>
+</html>
