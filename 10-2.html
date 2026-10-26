@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>荣子祎 | CSS Animation 幻灯片</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			min-height: 100vh;
+			margin: 0;
+			display: grid;
+			place-items: center;
+			padding: 48px 24px;
+			color: #fff;
+			background: #000;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+		}
+
+		main {
+			width: min(920px, 100%);
+		}
+
+		.eyebrow {
+			position: absolute;
+			z-index: 1;
+			top: 20px;
+			left: 24px;
+			margin: 0;
+			color: #fff;
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 2px;
+		}
+
+		.slideshow {
+			position: relative;
+			overflow: hidden;
+			width: 100%;
+			aspect-ratio: 3 / 1;
+			background: #000;
+		}
+
+		.slideshow img {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			opacity: 0;
+			animation: slide-fade 18s infinite;
+		}
+
+		.slideshow img:nth-child(2) {
+			animation-delay: 6s;
+		}
+
+		.slideshow img:nth-child(3) {
+			animation-delay: 12s;
+		}
+
+		@keyframes slide-fade {
+			0%, 28% { opacity: 1; }
+			34%, 100% { opacity: 0; }
+		}
+
+		.caption {
+			display: flex;
+			position: absolute;
+			z-index: 1;
+			inset: 0;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 12px;
+			padding: 24px;
+			color: #fff;
+			text-align: center;
+			text-shadow: 0 2px 10px #000, 0 1px 3px #000;
+			pointer-events: none;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: 40px;
+			font-weight: 700;
+			line-height: 1.2;
+		}
+
+		.caption p {
+			margin: 0;
+			color: #fff;
+			font-size: 15px;
+			line-height: 1.7;
+		}
+
+		@media (max-width: 560px) {
+			body {
+				padding: 28px 18px;
+			}
+
+			.slideshow {
+				aspect-ratio: 2 / 1;
+			}
+
+			.eyebrow {
+				top: 14px;
+				left: 16px;
+			}
+
+			h1 {
+				font-size: 34px;
+			}
+
+			.caption p {
+				font-size: 13px;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.slideshow img {
+				animation: none;
+			}
+
+			.slideshow img:first-child {
+				opacity: 1;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<div class="slideshow" aria-label="学习主题图片幻灯片">
+			<img src="img/1.jpg" alt="学习强国主题图">
+			<img src="img/2.jpg" alt="学习强国主题插画">
+			<img src="img/3.jpg" alt="中国梦主题图">
+			<p class="eyebrow">CSS ANIMATION / 10-2</p>
+			<section class="caption">
+				<h1>荣子祎</h1>
+				<p>心有所向，行有所成。<br>让每一次学习，都成为向前的力量。</p>
+			</section>
+		</div>
+	</main>
+</body>
+</html>

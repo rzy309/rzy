@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS3 3D 画廊</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #0c0e1a 0%, #1a1f3a 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #e0e0e0;
+  }
+  .rong_h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .rong_subtitle {
+    color: #888;
+    font-size: 13px;
+    margin-bottom: 30px;
+  }
+  .rong_gallery-scene {
+    width: 260px;
+    height: 180px;
+    perspective: 900px;
+  }
+  .rong_gallery {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rong_gallery-spin 12s linear infinite;
+  }
+  .rong_gallery-item {
+    position: absolute;
+    width: 220px;
+    height: 150px;
+    left: 20px;
+    top: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,.15);
+    box-shadow: 0 8px 30px rgba(0,0,0,.5);
+    backface-visibility: hidden;
+  }
+  .rong_gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .rong_gallery-item:nth-child(1) { transform: rotateY(0deg) translateZ(280px); }
+  .rong_gallery-item:nth-child(2) { transform: rotateY(60deg) translateZ(280px); }
+  .rong_gallery-item:nth-child(3) { transform: rotateY(120deg) translateZ(280px); }
+  .rong_gallery-item:nth-child(4) { transform: rotateY(180deg) translateZ(280px); }
+  .rong_gallery-item:nth-child(5) { transform: rotateY(240deg) translateZ(280px); }
+  .rong_gallery-item:nth-child(6) { transform: rotateY(300deg) translateZ(280px); }
+  @keyframes rong_gallery-spin {
+    from { transform: rotateX(-8deg) rotateY(0deg); }
+    to   { transform: rotateX(-8deg) rotateY(360deg); }
+  }
+  .rong_controls {
+    margin-top: 40px;
+    display: flex;
+    gap: 16px;
+  }
+  .rong_btn {
+    padding: 10px 24px;
+    border: 1px solid rgba(96,165,250,.4);
+    background: rgba(96,165,250,.1);
+    color: #60a5fa;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .3s;
+  }
+  .rong_btn:hover {
+    background: rgba(96,165,250,.25);
+    border-color: #60a5fa;
+  }
+  .rong_floor {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, transparent, rgba(96,165,250,.03));
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <h1 class="rong_h1">CSS3 3D 画廊</h1>
+  <p class="rong_subtitle">本地图片 · 360° 旋转展示</p>
+  <div class="rong_gallery-scene">
+    <div class="rong_gallery" id="rong_gallery">
+      <div class="rong_gallery-item"><img src="./img/1.jpg" alt="图片1"></div>
+      <div class="rong_gallery-item"><img src="./img/2.jpg" alt="图片2"></div>
+      <div class="rong_gallery-item"><img src="./img/3.jpg" alt="图片3"></div>
+      <div class="rong_gallery-item"><img src="./img/OIP-C.webp" alt="图片4"></div>
+      <div class="rong_gallery-item"><img src="./img/OIP-C (1).webp" alt="图片5"></div>
+      <div class="rong_gallery-item"><img src="./img/OIP-C (2).webp" alt="图片6"></div>
+    </div>
+  </div>
+  <div class="rong_controls">
+    <button class="rong_btn" id="rong_btn-prev">← 上一张</button>
+    <button class="rong_btn" id="rong_btn-next">下一张 →</button>
+    <button class="rong_btn" id="rong_btn-toggle">暂停/播放</button>
+  </div>
+  <div class="rong_floor"></div>
+  <script>
+    var rong_gallery = document.getElementById('rong_gallery');
+    var rong_btnPrev = document.getElementById('rong_btn-prev');
+    var rong_btnNext = document.getElementById('rong_btn-next');
+    var rong_btnToggle = document.getElementById('rong_btn-toggle');
+    var rong_playing = true;
+    var rong_currentDeg = 0;
+    var rong_step = 60;
+
+    rong_btnPrev.addEventListener('click', function() {
+      rong_currentDeg += rong_step;
+      rong_gallery.style.animation = 'none';
+      rong_gallery.style.transform = 'rotateX(-8deg) rotateY(' + rong_currentDeg + 'deg)';
+    });
+    rong_btnNext.addEventListener('click', function() {
+      rong_currentDeg -= rong_step;
+      rong_gallery.style.animation = 'none';
+      rong_gallery.style.transform = 'rotateX(-8deg) rotateY(' + rong_currentDeg + 'deg)';
+    });
+    rong_btnToggle.addEventListener('click', function() {
+      if (rong_playing) {
+        rong_gallery.style.animationPlayState = 'paused';
+        rong_btnToggle.textContent = '播放';
+      } else {
+        rong_gallery.style.animationPlayState = 'running';
+        rong_btnToggle.textContent = '暂停';
+      }
+      rong_playing = !rong_playing;
+    });
+  </script>
+</body>
+</html>

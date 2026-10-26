@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>309 荣子祎</title>
+    <style>
+        h3{
+            color: red;
+        }
+        p{
+            color: blue;
+        }
+        /* 标签选择器，选择器名称为标签名 */
+        #box{
+            width: 500px;
+            height: 500px;
+            background-color: #ccc;
+        }
+        /* id选择器，以#开头，页面id值必须唯一 */
+        .n1{
+            color: #7a9;
+        }
+        .n2{
+            color: blue;
+        }
+        .n3{
+            color: pink;
+        }
+        /* class类选择器，以.开头，类名可以多个元素重复使用 */
+
+        /* h2黑底白字 */
+        h2 {
+            background-color: black;
+            color: white;
+        }
+        /* "选择器"三个字白色 */
+        .word-white{
+            color: white;
+        }
+        /* 新盒子：学号盒子，宽高背景 */
+        .stu-box{
+            width: 300px;
+            height: 120px;
+            background-color: skyblue;
+            margin-top: 20px;
+            line-height: 120px;
+            text-align: center;
+            font-size: 22px;
+        }
+    </style>
+</head>
+<body>
+    <h2>层叠样式表<span class="word-white">选择器</span>CSS</h2>
+    <div id="box">
+        <h3>CSS<span style="color:white">选择器</span></h3>
+
+        <p>
+            <span class="n1">荣</span>
+            <span class="n2">子</span>
+            <span class="n3">祎</span>
+        </p>
+        <p>CSS属性</p>
+    </div>
+
+    <!-- 新加盒子，放学号 -->
+    <div class="stu-box">
+        学号：24001010309
+    </div>
+</body>
+</html>

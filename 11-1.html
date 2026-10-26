@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 长度单位</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    padding: 24px;
+    color: #333;
+  }
+  h1 { text-align: center; margin-bottom: 8px; font-size: 26px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 24px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  }
+  .card h2 { font-size: 15px; margin-bottom: 4px; }
+  .card .desc { font-size: 13px; color: #666; margin-bottom: 10px; }
+  .demo-box {
+    background: #e8f0fe;
+    border: 1px dashed #4285f4;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a56c4;
+    font-size: 13px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  code { background: #f5f5f5; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+  /* 各类单位演示样式 */
+  .d-px   .demo-box { width: 150px; height: 60px; }
+  .d-em   .demo-box { font-size: 20px; }
+  .d-em   .demo-box > div { width: 10em; height: 60px; }
+  .d-rem  .demo-box > div { width: 9rem; height: 60px; }
+  .d-pct  .demo-box > div { width: 70%; height: 60px; }
+  .d-vw   .demo-box > div { width: 30vw; height: 60px; }
+  .d-vh   .demo-box > div { width: 120px; height: 15vh; }
+  .d-vmin .demo-box > div { width: 25vmin; height: 25vmin; }
+  .d-vmax .demo-box > div { width: 20vmax; height: 20vmax; }
+  .d-ch   .demo-box > div { width: 25ch; height: 60px; }
+  .d-cm   .demo-box > div { width: 4cm; height: 40px; }
+
+  .val { font-size: 12px; color: #999; margin-top: 6px; }
+</style>
+</head>
+<body>
+  <h1>CSS 长度单位一览</h1>
+  <p class="subtitle">浏览器窗口缩放或修改字号时观察各卡片的尺寸变化</p>
+  <div class="grid">
+
+    <div class="card d-px">
+      <h2>px — 像素</h2>
+      <p class="desc">绝对单位，最常用的屏幕单位。不随窗口或字号变化。</p>
+      <div class="demo-box">150px × 60px</div>
+      <div class="val"><code>width: 150px</code></div>
+    </div>
+
+    <div class="card d-em">
+      <h2>em — 相对父元素字号</h2>
+      <p class="desc">相对于父元素的 font-size。此处父级设为 20px。</p>
+      <div class="demo-box"><div>10em = 200px</div></div>
+      <div class="val"><code>width: 10em</code>（父 font-size: 20px）</div>
+    </div>
+
+    <div class="card d-rem">
+      <h2>rem — 相对根元素字号</h2>
+      <p class="desc">始终相对于 &lt;html&gt; 的 font-size（默认 16px），不受嵌套影响。</p>
+      <div class="demo-box"><div>9rem ≈ 144px</div></div>
+      <div class="val"><code>width: 9rem</code></div>
+    </div>
+
+    <div class="card d-pct">
+      <h2>% — 百分比</h2>
+      <p class="desc">相对于父元素对应属性的比例。</p>
+      <div class="demo-box"><div>宽 = 70%</div></div>
+      <div class="val"><code>width: 70%</code></div>
+    </div>
+
+    <div class="card d-vw">
+      <h2>vw — 视口宽度 1%</h2>
+      <p class="desc">viewport width。窗口越宽，元素越大。</p>
+      <div class="demo-box"><div>宽 = 30vw</div></div>
+      <div class="val"><code>width: 30vw</code></div>
+    </div>
+
+    <div class="card d-vh">
+      <h2>vh — 视口高度 1%</h2>
+      <p class="desc">viewport height。窗口越高，元素越大。</p>
+      <div class="demo-box"><div>高 = 15vh</div></div>
+      <div class="val"><code>height: 15vh</code></div>
+    </div>
+
+    <div class="card d-vmin">
+      <h2>vmin — 视口较小边 1%</h2>
+      <p class="desc">取 vw、vh 中较小的那个计算。</p>
+      <div class="demo-box"><div>25vmin</div></div>
+      <div class="val"><code>width: 25vmin</code></div>
+    </div>
+
+    <div class="card d-vmax">
+      <h2>vmax — 视口较大边 1%</h2>
+      <p class="desc">取 vw、vh 中较大的那个计算。</p>
+      <div class="demo-box"><div>20vmax</div></div>
+      <div class="val"><code>width: 20vmax</code></div>
+    </div>
+
+    <div class="card d-ch">
+      <h2>ch — 字符 "0" 宽度</h2>
+      <p class="desc">当前字体中数字 0 的宽度，常用于限制文本行宽。</p>
+      <div class="demo-box"><div>25ch</div></div>
+      <div class="val"><code>width: 25ch</code></div>
+    </div>
+
+    <div class="card d-cm">
+      <h2>cm — 厘米（物理单位）</h2>
+      <p class="desc">绝对物理单位，打印场景可用，屏幕上不精确。</p>
+      <div class="demo-box"><div>4cm</div></div>
+      <div class="val"><code>width: 4cm</code>（≈ 151px）</div>
+    </div>
+
+  </div>
+</body>
+</html>

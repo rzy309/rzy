@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>视口媒体查询</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		html {
+			font-size: 14px;
+		}
+
+		html,
+		body {
+			width: 100%;
+			min-height: 100%;
+			margin: 0;
+		}
+
+		.box {
+			width: 100%;
+			min-height: 100vh;
+			display: grid;
+			place-items: center;
+			background-color: #d95945;
+			color: #fff;
+			transition: background-color 250ms ease;
+		}
+
+		h1 {
+			margin: 0;
+			font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+			font-size: 3rem;
+		}
+
+		@media (min-width: 600px) {
+			html {
+				font-size: 18px;
+			}
+
+			.box {
+				background-color: #d99b32;
+			}
+		}
+
+		@media (min-width: 900px) {
+			html {
+				font-size: 22px;
+			}
+
+			.box {
+				background-color: #28766f;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main class="box">
+		<h1>荣子祎</h1>
+	</main>
+</body>
+</html>

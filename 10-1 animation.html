@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>背景颜色动画</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			min-height: 100vh;
+			margin: 0;
+			display: grid;
+			place-items: center;
+			background: #f3f5f7;
+		}
+
+		.box {
+			width: 240px;
+			height: 160px;
+			border-radius: 12px;
+			animation: color-cycle 8s infinite;
+		}
+
+		@keyframes color-cycle {
+			0%, 100% { background-color: #f44336; }
+			25% { background-color: #ff9800; }
+			50% { background-color: #4caf50; }
+			75% { background-color: #2196f3; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.box {
+				animation: none;
+				background-color: #f44336;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="box" aria-label="背景颜色循环变化的盒子"></div>
+</body>
+</html>
