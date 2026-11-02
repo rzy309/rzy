@@ -1,0 +1,383 @@
+<!-- 姓名：荣子祎，日期：2026-11-02，功能：fetch 商品列表 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-3 商品列表 - 荣子祎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: #2d3436;
+        }
+
+        .rzy_container { max-width: 1100px; margin: 0 auto; }
+
+        /* ============ 顶部 ============ */
+        .rzy_header {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 24px;
+        }
+        .rzy_title { font-size: 28px; font-weight: bold; margin-bottom: 6px; }
+        .rzy_subtitle { font-size: 14px; opacity: 0.85; }
+        .rzy_api-tag {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            font-size: 12px;
+            font-family: "Consolas", monospace;
+        }
+
+        /* ============ 状态 + 控制 ============ */
+        .zy_control-bar {
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .zy_ctrl-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+        .zy_btn {
+            padding: 8px 16px;
+            background: #0984e3;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .zy_btn:hover { background: #0770c2; }
+        .zy_btn:active { transform: scale(0.97); }
+        .zy_btn.zy_btn-alt { background: #00b894; }
+        .zy_btn.zy_btn-alt:hover { background: #00a381; }
+        .zy_btn:disabled { background: #b2bec3; cursor: not-allowed; }
+
+        .zy_filter {
+            padding: 7px 10px;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            max-width: 200px;
+        }
+        .zy_filter:focus { border-color: #667eea; }
+
+        .zy_status-text { font-size: 13px; color: #636e72; }
+        .zy_status-text b { color: #00b894; }
+
+        /* ============ 加载中 ============ */
+        .zy_loading {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 10px;
+        }
+        .zy_spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #eef0ff;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            animation: zy_rotate 0.8s linear infinite;
+        }
+        @keyframes zy_rotate { to { transform: rotate(360deg); } }
+        .zy_loading p { color: #636e72; font-size: 13px; }
+
+        .zy_err {
+            background: #ffe0e0;
+            color: #d63031;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 14px;
+            white-space: pre-wrap;
+            font-size: 13px;
+        }
+
+        /* ============ 商品网格 ============ */
+        .zy_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .zy_card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            transition: transform 0.25s, box-shadow 0.25s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            border: 2px solid transparent;
+        }
+        .zy_card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(102, 126, 234, 0.3);
+            border-color: #c8cdfa;
+        }
+
+        .zy_card-img {
+            width: 100%;
+            height: 160px;
+            background: #f8f9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .zy_card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .zy_card:hover .zy_card-img img { transform: scale(1.06); }
+
+        .zy_discount-tag {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: linear-gradient(135deg, #d63031, #e17055);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .zy_card-body { padding: 14px 16px 16px; }
+
+        .zy_card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 38px;
+        }
+
+        .zy_card-cat {
+            display: inline-block;
+            background: #eef0ff;
+            color: #667eea;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .zy_card-price {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .zy_price-now {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d63031;
+        }
+        .zy_price-old {
+            font-size: 12px;
+            color: #b2bec3;
+            text-decoration: line-through;
+        }
+
+        .zy_card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #636e72;
+        }
+        .zy_rating {
+            color: #fab1a0;
+            font-weight: 600;
+        }
+        .zy_stock-low { color: #d63031; font-weight: 600; }
+        .zy_stock-ok { color: #00b894; }
+
+        /* ============ 页脚 ============ */
+        .rzy_footer {
+            text-align: center;
+            color: #fff;
+            margin-top: 24px;
+            font-size: 14px;
+        }
+        .rzy_back {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 22px;
+            background: #fff;
+            color: #6c5ce7;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .rzy_back:hover { background: #f0f0f0; }
+
+        @media (max-width: 600px) {
+            body { padding: 14px; }
+            .rzy_title { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rzy_container">
+        <div class="rzy_header">
+            <h1 class="rzy_title">商品列表</h1>
+            <div class="rzy_subtitle">fetch 从 DummyJSON 获取 · 点击卡片查看详情</div>
+            <div class="rzy_api-tag">GET https://dummyjson.com/products?limit=8</div>
+        </div>
+
+        <!-- 控制条 -->
+        <div class="zy_control-bar">
+            <div class="zy_ctrl-left">
+                <button class="zy_btn" id="zyBtnLoad" onclick="rzy_loadList()">🔄 重新加载</button>
+                <select class="zy_filter" id="zyFilterCat" onchange="rzy_render()">
+                    <option value="">全部分类</option>
+                </select>
+                <input class="zy_filter" id="zySearch" placeholder="搜索标题…" oninput="rzy_render()">
+            </div>
+            <div class="zy_status-text" id="zyStatus">准备中…</div>
+        </div>
+
+        <!-- 错误提示 -->
+        <div id="zyErr"></div>
+
+        <!-- 商品网格 -->
+        <div id="zyLoading" class="zy_loading" style="display:none;">
+            <div class="zy_spinner"></div>
+            <p>正在从服务器加载商品…</p>
+        </div>
+
+        <div class="zy_grid" id="zyGrid"></div>
+
+        <div class="rzy_footer">
+            页面作者：荣子祎 · 2026-11-02
+            <br>
+            <a href="index.html" class="rzy_back">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        var rzy_cache = [];
+
+        function rzy_loadList() {
+            var zy_btn = document.getElementById('zyBtnLoad');
+            var zy_loading = document.getElementById('zyLoading');
+            var zy_grid = document.getElementById('zyGrid');
+            var zy_status = document.getElementById('zyStatus');
+            var zy_err = document.getElementById('zyErr');
+
+            zy_btn.disabled = true;
+            zy_loading.style.display = 'block';
+            zy_grid.innerHTML = '';
+            zy_err.innerHTML = '';
+            zy_status.innerHTML = '<b>⏳</b> 请求中…';
+
+            fetch('https://dummyjson.com/products?limit=8')
+                .then(function(res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function(data) {
+                    rzy_cache = data.products || [];
+
+                    // 填充分类筛选器
+                    var zy_cats = Array.from(new Set(rzy_cache.map(function(p){ return p.category; })));
+                    var zy_sel = document.getElementById('zyFilterCat');
+                    zy_sel.innerHTML = '<option value="">全部分类</option>';
+                    zy_cats.forEach(function(c) {
+                        zy_sel.innerHTML += '<option value="' + c + '">' + c + '</option>';
+                    });
+
+                    zy_status.innerHTML = '<b>✅</b> 已加载 ' + rzy_cache.length + ' 个商品，点卡片查看详情';
+                    rzy_render();
+                })
+                .catch(function(err) {
+                    zy_err.innerHTML = '❌ 请求失败：' + err.message +
+                        '\n\n请确认：\n① 用 http:// 打开（不要 file://）\n② 网络连接正常';
+                    zy_status.innerHTML = '<b>❌</b> 加载失败';
+                    console.error(err);
+                })
+                .then(function() {
+                    zy_btn.disabled = false;
+                    zy_loading.style.display = 'none';
+                });
+        }
+
+        function rzy_render() {
+            if (!rzy_cache.length) return;
+
+            var zy_cat = document.getElementById('zyFilterCat').value;
+            var zy_kw  = document.getElementById('zySearch').value.trim().toLowerCase();
+
+            var zy_list = rzy_cache.filter(function(p) {
+                if (zy_cat && p.category !== zy_cat) return false;
+                if (zy_kw && (p.title || '').toLowerCase().indexOf(zy_kw) === -1) return false;
+                return true;
+            });
+
+            var zy_html = '';
+            zy_list.forEach(function(p) {
+                // 折扣后价格
+                var zy_final = (p.price * (1 - p.discountPercentage / 100)).toFixed(2);
+                var zy_img = (p.thumbnail && p.thumbnail.startsWith('http'))
+                    ? p.thumbnail
+                    : (p.images && p.images[0]) || '';
+
+                zy_html += '<a href="17-3-detail.html?id=' + p.id + '" class="zy_card">' +
+                    '<div class="zy_card-img">' +
+                        (p.discountPercentage >= 5
+                            ? '<span class="zy_discount-tag">-' + p.discountPercentage.toFixed(0) + '%</span>'
+                            : '') +
+                        (zy_img ? '<img src="' + zy_img + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
+                    '</div>' +
+                    '<div class="zy_card-body">' +
+                        '<span class="zy_card-cat">' + (p.category || '') + '</span>' +
+                        '<div class="zy_card-title">' + p.title + '</div>' +
+                        '<div class="zy_card-price">' +
+                            '<span class="zy_price-now">¥' + zy_final + '</span>' +
+                            (p.discountPercentage >= 5
+                                ? '<span class="zy_price-old">¥' + p.price.toFixed(2) + '</span>'
+                                : '') +
+                        '</div>' +
+                        '<div class="zy_card-meta">' +
+                            '<span class="zy_rating">★ ' + p.rating + '</span>' +
+                            '<span class="' + (p.stock < 20 ? 'zy_stock-low' : 'zy_stock-ok') + '">库存 ' + p.stock + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</a>';
+            });
+
+            if (!zy_list.length) {
+                zy_html = '<div style="grid-column:1/-1;text-align:center;color:#fff;padding:40px 0;">无匹配商品</div>';
+            }
+            document.getElementById('zyGrid').innerHTML = zy_html;
+        }
+
+        window.onload = rzy_loadList;
+    </script>
+</body>
+</html>

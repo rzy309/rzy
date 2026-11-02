@@ -1,0 +1,464 @@
+<!-- 姓名：荣子祎，日期：2026-11-02，功能：fetch 商品详情 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情 - 荣子祎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: #2d3436;
+        }
+
+        .rzy_container { max-width: 1000px; margin: 0 auto; }
+
+        /* ============ 顶部条 ============ */
+        .zy_topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .zy_back-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .zy_back-btn:hover { background: rgba(255, 255, 255, 0.3); }
+        .zy_title-top { font-size: 20px; font-weight: bold; }
+
+        /* ============ 加载/错误 ============ */
+        .zy_center-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        .zy_spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #eef0ff;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            animation: zy_rotate 0.8s linear infinite;
+        }
+        @keyframes zy_rotate { to { transform: rotate(360deg); } }
+        .zy_center-box p { color: #636e72; font-size: 14px; }
+
+        /* ============ 详情卡片 ============ */
+        .zy_detail-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .zy_detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        /* 左：图片区 */
+        .zy_imgs {
+            background: #f8f9ff;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .zy_main-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #fff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.15);
+        }
+        .zy_main-img img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .zy_thumb-row {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+        .zy_thumb {
+            width: 60px; height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            background: #fff;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .zy_thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .zy_thumb.zy_active { border-color: #667eea; }
+
+        /* 右：信息区 */
+        .zy_info { padding: 28px 30px; }
+
+        .zy_cat-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .zy_badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .zy_badge.zy_cat { background: #eef0ff; color: #667eea; }
+        .zy_badge.zy_brand { background: #e0fffa; color: #00b894; }
+        .zy_badge.zy_stock-low { background: #ffe0e0; color: #d63031; }
+        .zy_badge.zy_stock-ok { background: #e0fffa; color: #00b894; }
+
+        .zy_name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 4px;
+            line-height: 1.35;
+        }
+
+        .zy_sku { font-size: 12px; color: #b2bec3; margin-bottom: 12px; }
+
+        .zy_desc {
+            font-size: 14px;
+            color: #636e72;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .zy_price-row {
+            background: linear-gradient(135deg, #fff5f5, #ffe5e5);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .zy_price-now { font-size: 28px; font-weight: bold; color: #d63031; }
+        .zy_price-old { font-size: 14px; color: #b2bec3; text-decoration: line-through; }
+        .zy_discount-big {
+            background: linear-gradient(135deg, #d63031, #e17055);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .zy_rating-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #636e72;
+        }
+        .zy_star { color: #fdcb6e; font-weight: bold; }
+
+        /* 元信息网格 */
+        .zy_meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .zy_meta-item {
+            background: #f8f9ff;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .zy_meta-label { font-size: 11px; color: #b2bec3; margin-bottom: 3px; }
+        .zy_meta-val   { font-size: 13px; color: #2d3436; font-weight: 600; word-break: break-all; }
+
+        /* ============ 底部：标签 & 评论 ============ */
+        .zy_section-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 22px 24px;
+            margin-top: 18px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+        .zy_section-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f5;
+        }
+
+        .zy_tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .zy_tag {
+            background: #eef0ff;
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* 评论 */
+        .zy_review {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f5;
+        }
+        .zy_review:last-child { border-bottom: none; }
+        .zy_review-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .zy_reviewer { font-weight: 600; font-size: 14px; color: #2d3436; }
+        .zy_review-date { font-size: 12px; color: #b2bec3; }
+        .zy_review-comment { font-size: 13px; color: #636e72; line-height: 1.6; }
+
+        /* ============ 页脚 ============ */
+        .rzy_footer {
+            text-align: center;
+            color: #fff;
+            margin-top: 24px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 760px) {
+            .zy_detail-grid { grid-template-columns: 1fr; }
+            .zy_imgs { padding: 20px; }
+            .zy_info { padding: 20px; }
+            .zy_meta-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rzy_container">
+        <div class="zy_topbar">
+            <a href="17-3.html" class="zy_back-btn">← 返回商品列表</a>
+            <span class="zy_title-top">商品详情</span>
+        </div>
+
+        <!-- 加载 / 错误容器 -->
+        <div id="zyMain"></div>
+
+        <div class="rzy_footer">
+            页面作者：荣子祎 · 2026-11-02
+        </div>
+    </div>
+
+    <script>
+        // 从 URL 取 id
+        var rzy_params = new URLSearchParams(window.location.search);
+        var rzy_id = rzy_params.get('id') || '1';
+
+        // 格式化日期
+        function rzy_fmtDate(s) {
+            if (!s) return '';
+            var d = new Date(s);
+            if (isNaN(d.getTime())) return s;
+            return d.getFullYear() + '-' +
+                String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                String(d.getDate()).padStart(2, '0');
+        }
+
+        function rzy_loadDetail() {
+            var zy_main = document.getElementById('zyMain');
+
+            // 没有 id，提示
+            if (!rzy_id || isNaN(parseInt(rzy_id))) {
+                zy_main.innerHTML =
+                    '<div class="zy_center-box">' +
+                        '<p style="color:#d63031;font-weight:bold;margin-bottom:10px;">❌ 未指定商品 ID</p>' +
+                        '<p>请从列表页点击商品卡片，或手动访问 ?id=数字</p>' +
+                        '<p style="margin-top:20px;"><a href="17-3.html" class="zy_back-btn">返回列表</a></p>' +
+                    '</div>';
+                return;
+            }
+
+            // 加载中
+            zy_main.innerHTML =
+                '<div class="zy_center-box">' +
+                    '<div class="zy_spinner"></div>' +
+                    '<p>正在加载商品 #' + rzy_id + ' 的详情…</p>' +
+                '</div>';
+
+            fetch('https://dummyjson.com/products/' + rzy_id)
+                .then(function(res) {
+                    if (res.status === 404) throw new Error('商品 #' + rzy_id + ' 不存在 (404)');
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function(p) {
+                    rzy_render(p);
+                })
+                .catch(function(err) {
+                    zy_main.innerHTML =
+                        '<div class="zy_center-box" style="color:#d63031;">' +
+                            '<p style="font-weight:bold;margin-bottom:10px;">❌ ' + err.message + '</p>' +
+                            '<p style="color:#636e72;">请确认网络连接正常</p>' +
+                            '<p style="margin-top:20px;"><a href="17-3.html" class="zy_back-btn">返回列表</a></p>' +
+                        '</div>';
+                    console.error(err);
+                });
+        }
+
+        /* 渲染详情页 */
+        function rzy_render(p) {
+            var zy_main = document.getElementById('zyMain');
+            var zy_final = (p.price * (1 - p.discountPercentage / 100)).toFixed(2);
+            var zy_imgs = p.images && p.images.length ? p.images :
+                (p.thumbnail ? [p.thumbnail] : []);
+
+            // 缩略图 + 主图点击切换
+            var zy_thumbsHtml = '';
+            zy_imgs.forEach(function(src, i) {
+                zy_thumbsHtml +=
+                    '<div class="zy_thumb ' + (i === 0 ? 'zy_active' : '') + '" data-idx="' + i + '">' +
+                        '<img src="' + src + '" alt="" onerror="this.style.display=\'none\'">' +
+                    '</div>';
+            });
+
+            // 标签
+            var zy_tagsHtml = '';
+            (p.tags || []).forEach(function(t) {
+                zy_tagsHtml += '<span class="zy_tag">' + t + '</span>';
+            });
+
+            // 评论
+            var zy_reviewsHtml = '';
+            if (p.reviews && p.reviews.length) {
+                p.reviews.forEach(function(r) {
+                    zy_reviewsHtml +=
+                        '<div class="zy_review">' +
+                            '<div class="zy_review-top">' +
+                                '<span class="zy_reviewer">' + r.reviewerName +
+                                    ' <span class="zy_star">★ ' + r.rating + '</span></span>' +
+                                '<span class="zy_review-date">' + rzy_fmtDate(r.date) + '</span>' +
+                            '</div>' +
+                            '<div class="zy_review-comment">' + r.comment + '</div>' +
+                        '</div>';
+                });
+            } else {
+                zy_reviewsHtml = '<div style="color:#b2bec3;text-align:center;padding:20px;">暂无评论</div>';
+            }
+
+            zy_main.innerHTML =
+                // ======== 主详情卡片 ========
+                '<div class="zy_detail-card">' +
+                    '<div class="zy_detail-grid">' +
+                        // 左：图片
+                        '<div class="zy_imgs">' +
+                            '<div class="zy_main-img" id="zyMainImg">' +
+                                '<img src="' + zy_imgs[0] + '" alt="' + p.title + '" onerror="this.parentElement.innerHTML=\'<p style=\\\'color:#b2bec3\\\'>暂无图片</p>\'">' +
+                            '</div>' +
+                            '<div class="zy_thumb-row">' + zy_thumbsHtml + '</div>' +
+                        '</div>' +
+
+                        // 右：信息
+                        '<div class="zy_info">' +
+                            '<div class="zy_cat-row">' +
+                                '<span class="zy_badge zy_cat">' + (p.category || '') + '</span>' +
+                                (p.brand ? '<span class="zy_badge zy_brand">' + p.brand + '</span>' : '') +
+                                (p.stock !== undefined
+                                    ? '<span class="zy_badge ' + (p.stock < 20 ? 'zy_stock-low' : 'zy_stock-ok') + '">' +
+                                        (p.availabilityStatus || ('库存 ' + p.stock)) + '</span>'
+                                    : '') +
+                            '</div>' +
+                            '<div class="zy_name">' + p.title + '</div>' +
+                            '<div class="zy_sku">SKU：' + (p.sku || '—') + ' · 商品 #' + p.id + '</div>' +
+                            '<div class="zy_desc">' + (p.description || '') + '</div>' +
+
+                            '<div class="zy_price-row">' +
+                                '<span class="zy_price-now">¥' + zy_final + '</span>' +
+                                (p.discountPercentage >= 5
+                                    ? '<span class="zy_price-old">¥' + p.price.toFixed(2) + '</span>' +
+                                      '<span class="zy_discount-big">-' + p.discountPercentage.toFixed(0) + '%</span>'
+                                    : '') +
+                            '</div>' +
+
+                            '<div class="zy_rating-row">' +
+                                '<span>评分 <span class="zy_star">★ ' + p.rating + '</span></span>' +
+                                '<span>权重 ' + (p.weight !== undefined ? p.weight + ' kg' : '—') + '</span>' +
+                            '</div>' +
+
+                            '<div class="zy_meta-grid">' +
+                                '<div class="zy_meta-item">' +
+                                    '<div class="zy_meta-label">质保</div>' +
+                                    '<div class="zy_meta-val">' + (p.warrantyInformation || '—') + '</div>' +
+                                '</div>' +
+                                '<div class="zy_meta-item">' +
+                                    '<div class="zy_meta-label">发货</div>' +
+                                    '<div class="zy_meta-val">' + (p.shippingInformation || '—') + '</div>' +
+                                '</div>' +
+                                '<div class="zy_meta-item">' +
+                                    '<div class="zy_meta-label">退换</div>' +
+                                    '<div class="zy_meta-val">' + (p.returnPolicy || '—') + '</div>' +
+                                '</div>' +
+                                '<div class="zy_meta-item">' +
+                                    '<div class="zy_meta-label">MOQ</div>' +
+                                    '<div class="zy_meta-val">' + (p.minimumOrderQuantity || 1) + ' 件</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                // ======== 标签卡片 ========
+                '<div class="zy_section-card">' +
+                    '<div class="zy_section-title">标签</div>' +
+                    '<div class="zy_tags">' + zy_tagsHtml + '</div>' +
+                '</div>' +
+
+                // ======== 评论卡片 ========
+                '<div class="zy_section-card">' +
+                    '<div class="zy_section-title">用户评价（' + (p.reviews ? p.reviews.length : 0) + ' 条）</div>' +
+                    zy_reviewsHtml +
+                '</div>';
+
+            // 绑定缩略图切换
+            document.querySelectorAll('.zy_thumb').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var idx = parseInt(this.getAttribute('data-idx'));
+                    document.querySelectorAll('.zy_thumb').forEach(function(t) { t.classList.remove('zy_active'); });
+                    this.classList.add('zy_active');
+                    var zy_img = zy_imgs[idx];
+                    document.getElementById('zyMainImg').innerHTML =
+                        '<img src="' + zy_img + '" alt="" onerror="this.parentElement.innerHTML=\'<p style=\\\'color:#b2bec3\\\'>暂无图片</p>\'">';
+                });
+            });
+
+            // 更新 URL 到顶
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // 同步浏览器历史（地址栏）
+            if (history.replaceState) {
+                history.replaceState(null, '', '17-3-detail.html?id=' + p.id);
+            }
+        }
+
+        window.onload = rzy_loadDetail;
+    </script>
+</body>
+</html>
