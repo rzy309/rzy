@@ -1,0 +1,593 @@
+<!-- 姓名：荣子祎，日期：2026-11-02，功能：fetch API 测试工具（GET/POST/PUT/DELETE） -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-4 API 测试工具 - 荣子祎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #2d3436 0%, #1e272e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2d3436;
+        }
+
+        .rzy_container { max-width: 1180px; margin: 0 auto; }
+
+        .rzy_header {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .rzy_title { font-size: 26px; font-weight: bold; margin-bottom: 6px; }
+        .rzy_subtitle { font-size: 13px; opacity: 0.75; }
+
+        /* ============ 请求面板 ============ */
+        .rzy_panel {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+        }
+
+        .rzy_row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* 方法下拉 + URL 输入 + 发送按钮 */
+        .zy_method {
+            padding: 0 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: "Consolas", monospace;
+            outline: none;
+            min-width: 80px;
+            cursor: pointer;
+        }
+        .zy_method:focus { border-color: #0984e3; }
+        /* 方法配色 */
+        .zy_method.zy_get    { color: #00b894; }
+        .zy_method.zy_post   { color: #0984e3; }
+        .zy_method.zy_put    { color: #e17055; }
+        .zy_method.zy_delete { color: #d63031; }
+        .zy_method.zy_patch  { color: #6c5ce7; }
+
+        .zy_url-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: "Consolas", monospace;
+            outline: none;
+        }
+        .zy_url-input:focus { border-color: #0984e3; }
+
+        .zy_send-btn {
+            padding: 10px 26px;
+            background: linear-gradient(135deg, #00b894, #0984e3);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+        .zy_send-btn:hover { box-shadow: 0 4px 14px rgba(0, 184, 148, 0.4); }
+        .zy_send-btn:active { transform: scale(0.97); }
+        .zy_send-btn:disabled { background: #b2bec3; cursor: not-allowed; box-shadow: none; }
+
+        /* 预设按钮 */
+        .zy_presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .zy_preset {
+            padding: 6px 12px;
+            background: #eef0ff;
+            border: 1px solid #c8cdfa;
+            color: #667eea;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .zy_preset:hover { background: #667eea; color: #fff; }
+
+        /* Headers / Body 切换 tab */
+        .zy_tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #eef0ff;
+            margin-bottom: 10px;
+        }
+        .zy_tab {
+            padding: 8px 18px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #636e72;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .zy_tab.zy_active { color: #0984e3; border-bottom-color: #0984e3; font-weight: bold; }
+
+        /* Body 编辑器 */
+        .zy_editor {
+            display: none;
+        }
+        .zy_editor.zy_show { display: block; }
+
+        textarea.zy_body, textarea.zy_headers {
+            width: 100%;
+            min-height: 130px;
+            padding: 12px 14px;
+            border: 2px solid #eef0ff;
+            border-radius: 8px;
+            font-family: "Consolas", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            background: #fafbff;
+        }
+        textarea.zy_body:focus, textarea.zy_headers:focus { border-color: #667eea; }
+
+        .zy_hint { font-size: 12px; color: #b2bec3; margin-top: 6px; }
+        .zy_hint code {
+            background: #eef0ff;
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: #667eea;
+        }
+
+        /* ============ 响应状态条 ============ */
+        .zy_status-bar {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: "Consolas", monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .zy_status-bar.zy_ok      { background: #e0fffa; color: #00a381; border-left: 4px solid #00b894; }
+        .zy_status-bar.zy_redirect{ background: #fff5e1; color: #d68910; border-left: 4px solid #fdcb6e; }
+        .zy_status-bar.zy_err     { background: #ffe0e0; color: #d63031; border-left: 4px solid #d63031; }
+        .zy_status-bar.zy_loading { background: #eef0ff; color: #667eea; border-left: 4px solid #667eea; }
+
+        .zy_status-code { font-weight: bold; font-size: 16px; }
+        .zy_status-meta { font-size: 12px; opacity: 0.8; }
+
+        /* ============ 响应区域 ============ */
+        .zy_res-sections {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 14px;
+        }
+        @media (max-width: 760px) {
+            .zy_res-sections { grid-template-columns: 1fr; }
+        }
+
+        .zy_res-box {
+            background: #2d3436;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .zy_res-box-title {
+            background: #1e272e;
+            color: #b2bec3;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .zy_headers-list {
+            padding: 12px 14px;
+            font-family: "Consolas", monospace;
+            font-size: 12px;
+            color: #dfe6e9;
+            line-height: 1.8;
+            max-height: 260px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        .zy_headers-list .zy_h-key { color: #74b9ff; }
+        .zy_headers-list .zy_h-val { color: #ffeaa7; }
+
+        .zy_body-res {
+            padding: 12px 14px;
+            font-family: "Consolas", monospace;
+            font-size: 12px;
+            color: #dfe6e9;
+            line-height: 1.7;
+            max-height: 460px;
+            overflow: auto;
+            white-space: pre;
+            word-break: break-all;
+        }
+        .zy_res-empty {
+            color: #636e72;
+            text-align: center;
+            padding: 40px 10px !important;
+            font-size: 13px;
+            white-space: normal !important;
+        }
+
+        /* JSON 语法高亮 */
+        .zy_jv-key    { color: #74b9ff; }
+        .zy_jv-string { color: #55efc4; }
+        .zy_jv-number { color: #fdcb6e; }
+        .zy_jv-bool   { color: #fab1a0; }
+        .zy_jv-null   { color: #a29bfe; font-style: italic; }
+        .zy_jv-brace  { color: #dfe6e9; }
+
+        /* ============ 页脚 ============ */
+        .rzy_footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 20px;
+            font-size: 13px;
+        }
+        .rzy_back {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 7px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .rzy_back:hover { background: rgba(255, 255, 255, 0.25); }
+
+        /* tabs 区 padding 修正 */
+        .zy_panel .zy_section-body { padding-top: 0; }
+
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .rzy_title { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rzy_container">
+        <div class="rzy_header">
+            <h1 class="rzy_title">🔧 API 测试工具（原生 fetch）</h1>
+            <div class="rzy_subtitle">支持 GET / POST / PUT / PATCH / DELETE · 格式化 JSON · 错误诊断 — 荣子祎</div>
+        </div>
+
+        <!-- ============ 请求区 ============ -->
+        <div class="rzy_panel">
+            <div class="rzy_row">
+                <select class="zy_method zy_post" id="zyMethod" onchange="rzy_switchMethod()">
+                    <option value="GET">GET</option>
+                    <option value="POST" selected>POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="PATCH">PATCH</option>
+                    <option value="DELETE">DELETE</option>
+                    <option value="OPTIONS">OPTIONS</option>
+                    <option value="HEAD">HEAD</option>
+                </select>
+                <input class="zy_url-input" id="zyUrl"
+                       value="https://jsonplaceholder.typicode.com/posts"
+                       placeholder="https://...">
+                <button class="zy_send-btn" id="zySendBtn" onclick="rzy_send()">发送</button>
+            </div>
+
+            <!-- 预设按钮 -->
+            <div class="zy_presets">
+                <b style="font-size:12px;color:#b2bec3;align-self:center;margin-right:4px;">预设：</b>
+                <button class="zy_preset" onclick="rzy_preset('GET',    'https://jsonplaceholder.typicode.com/posts?limit=3')">GET posts 3条</button>
+                <button class="zy_preset" onclick="rzy_preset('GET',    'https://dummyjson.com/products/1')">GET product 1</button>
+                <button class="zy_preset" onclick="rzy_preset('POST',   'https://jsonplaceholder.typicode.com/posts')">POST 新建 post</button>
+                <button class="zy_preset" onclick="rzy_preset('PUT',    'https://jsonplaceholder.typicode.com/posts/1')">PUT 更新 post 1</button>
+                <button class="zy_preset" onclick="rzy_preset('DELETE', 'https://jsonplaceholder.typicode.com/posts/1')">DELETE post 1</button>
+                <button class="zy_preset" onclick="rzy_preset('GET',    'https://httpstat.us/404')">模拟 404</button>
+                <button class="zy_preset" onclick="rzy_preset('GET',    'https://httpstat.us/500')">模拟 500</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="zy_tabs">
+                <div class="zy_tab zy_active" onclick="rzy_switchTab('body')">Body</div>
+                <div class="zy_tab" onclick="rzy_switchTab('headers')">Headers</div>
+            </div>
+
+            <div class="zy_editor zy_show" id="zyBodyEditor">
+                <textarea class="zy_body" id="zyBody" placeholder='POST / PUT 时填写 JSON body，例如：
+{
+  "title": "荣子祎测试",
+  "body": "Hello fetch!",
+  "userId": 1
+}'>{
+  "title": "荣子祎测试",
+  "body": "Hello fetch API!",
+  "userId": 1
+}</textarea>
+                <div class="rzy_row" style="margin-top:8px;">
+                    <button class="zy_preset" onclick="rzy_formatBody()">✨ 美化 JSON</button>
+                    <button class="zy_preset" onclick="rzy_compactBody()">🔘 压缩 JSON</button>
+                    <button class="zy_preset" onclick="rzy_clearBody()">🗑 清空</button>
+                </div>
+            </div>
+
+            <div class="zy_editor" id="zyHeadersEditor">
+                <textarea class="zy_headers" id="zyHeaders" placeholder='每行一个 Header，格式：
+Content-Type: application/json
+Authorization: Bearer xxxxx'></textarea>
+                <div class="zy_hint">格式：每行一个 <code>Key: Value</code>，留空则自动加 <code>Content-Type: application/json</code></div>
+            </div>
+        </div>
+
+        <!-- ============ 响应区 ============ -->
+        <div class="rzy_panel">
+            <div class="zy_status-bar zy_loading" id="zyStatusBar">
+                <span>⚡ 等待发送请求…</span>
+                <span class="zy_status-meta">提示：用 http:// 打开，不要 file://</span>
+            </div>
+
+            <div class="zy_res-sections">
+                <!-- 左：响应 Headers -->
+                <div class="zy_res-box">
+                    <div class="zy_res-box-title">Response Headers</div>
+                    <div class="zy_headers-list" id="zyResHeaders">（还没有响应）</div>
+                </div>
+
+                <!-- 右：响应 Body -->
+                <div class="zy_res-box">
+                    <div class="zy_res-box-title">Response Body</div>
+                    <div class="zy_body-res zy_res-empty" id="zyResBody">点击上方"发送"按钮开始请求…</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rzy_footer">
+            页面作者：荣子祎 · 2026-11-02
+            <br>
+            <a href="index.html" class="rzy_back">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        /* ========== Tab 切换 ========== */
+        function rzy_switchTab(which) {
+            document.querySelectorAll('.zy_tab').forEach(function(el) { el.classList.remove('zy_active'); });
+            if (which === 'body') {
+                document.querySelectorAll('.zy_tab')[0].classList.add('zy_active');
+                document.getElementById('zyBodyEditor').classList.add('zy_show');
+                document.getElementById('zyHeadersEditor').classList.remove('zy_show');
+            } else {
+                document.querySelectorAll('.zy_tab')[1].classList.add('zy_active');
+                document.getElementById('zyBodyEditor').classList.remove('zy_show');
+                document.getElementById('zyHeadersEditor').classList.add('zy_show');
+            }
+        }
+
+        /* ========== 方法配色 ========== */
+        function rzy_switchMethod() {
+            var m = document.getElementById('zyMethod');
+            m.className = 'zy_method zy_' + m.value.toLowerCase();
+        }
+        rzy_switchMethod();
+
+        /* ========== 预设 ========== */
+        function rzy_preset(method, url) {
+            document.getElementById('zyMethod').value = method;
+            document.getElementById('zyUrl').value = url;
+            rzy_switchMethod();
+            // GET 清空 body
+            if (method === 'GET' || method === 'DELETE' || method === 'HEAD' || method === 'OPTIONS') {
+                document.getElementById('zyBody').value = '';
+            }
+        }
+
+        /* ========== Body 格式化 ========== */
+        function rzy_formatBody() {
+            var t = document.getElementById('zyBody');
+            try {
+                t.value = JSON.stringify(JSON.parse(t.value), null, 4);
+            } catch (e) {
+                alert('JSON 语法错误：' + e.message);
+            }
+        }
+        function rzy_compactBody() {
+            var t = document.getElementById('zyBody');
+            try {
+                t.value = JSON.stringify(JSON.parse(t.value));
+            } catch (e) {
+                alert('JSON 语法错误：' + e.message);
+            }
+        }
+        function rzy_clearBody() { document.getElementById('zyBody').value = ''; }
+
+        /* ========== 发送请求 ========== */
+        function rzy_send() {
+            var zy_url = document.getElementById('zyUrl').value.trim();
+            var zy_method = document.getElementById('zyMethod').value;
+            var zy_btn = document.getElementById('zySendBtn');
+            var zy_bar = document.getElementById('zyStatusBar');
+
+            if (!zy_url) {
+                zy_bar.className = 'zy_status-bar zy_err';
+                zy_bar.innerHTML = '❌ URL 不能为空';
+                return;
+            }
+
+            // 准备 fetch 参数
+            var zy_init = { method: zy_method };
+            var zy_bodyStr = document.getElementById('zyBody').value.trim();
+            var zy_headersStr = document.getElementById('zyHeaders').value.trim();
+            var zy_hasBody  = !!zy_bodyStr &&
+                (zy_method === 'POST' || zy_method === 'PUT' || zy_method === 'PATCH');
+
+            // headers 解析
+            var zy_hdrs = {};
+            if (zy_headersStr) {
+                zy_headersStr.split('\n').forEach(function(line) {
+                    var idx = line.indexOf(':');
+                    if (idx > 0) {
+                        var k = line.substring(0, idx).trim();
+                        var v = line.substring(idx + 1).trim();
+                        if (k) zy_hdrs[k] = v;
+                    }
+                });
+            }
+            if (zy_hasBody && !('Content-Type' in zy_hdrs) && !('content-type' in zy_hdrs)) {
+                zy_hdrs['Content-Type'] = 'application/json';
+            }
+            if (Object.keys(zy_hdrs).length) zy_init.headers = zy_hdrs;
+
+            if (zy_hasBody) zy_init.body = zy_bodyStr;
+
+            // loading UI
+            zy_btn.disabled = true;
+            zy_bar.className = 'zy_status-bar zy_loading';
+            zy_bar.innerHTML = '<span>⏳ ' + zy_method + ' ' + zy_url + '</span><span>请求中…</span>';
+            document.getElementById('zyResHeaders').textContent = '（加载中…）';
+            document.getElementById('zyResBody').textContent = '（加载中…）';
+            document.getElementById('zyResBody').classList.remove('zy_res-empty');
+
+            var zy_t0 = Date.now();
+
+            fetch(zy_url, zy_init)
+                .then(function(res) {
+                    var zy_cost = Date.now() - zy_t0;
+                    rzy_renderStatus(res, zy_cost);
+
+                    // headers
+                    var zy_hTxt = '';
+                    res.headers.forEach(function(v, k) {
+                        zy_hTxt += '<span class="zy_h-key">' + k + '</span><span class="zy_jv-brace">:</span> <span class="zy_h-val">' + v + '</span>\n';
+                    });
+                    document.getElementById('zyResHeaders').innerHTML = zy_hTxt || '（无响应头）';
+
+                    // body 尝试按 JSON 解析，失败就显示纯文本
+                    return res.text().then(function(txt) {
+                        return { res: res, text: txt, cost: zy_cost };
+                    });
+                })
+                .then(function(r) {
+                    var zy_txt = r.text;
+                    if (!zy_txt) {
+                        document.getElementById('zyResBody').textContent = '（响应体为空）';
+                        document.getElementById('zyResBody').classList.add('zy_res-empty');
+                        return;
+                    }
+                    try {
+                        var zy_obj = JSON.parse(zy_txt);
+                        document.getElementById('zyResBody').innerHTML = rzy_highlight(zy_obj);
+                    } catch (e) {
+                        // 不是 JSON，当纯文本/HTML 显示
+                        document.getElementById('zyResBody').textContent = zy_txt;
+                    }
+                })
+                .catch(function(err) {
+                    var zy_cost = Date.now() - zy_t0;
+                    zy_bar.className = 'zy_status-bar zy_err';
+                    zy_bar.innerHTML =
+                        '<span class="zy_status-code">❌ 网络错误</span>' +
+                        '<span class="zy_status-meta">耗时 ' + zy_cost + 'ms</span>';
+
+                    document.getElementById('zyResHeaders').textContent = '（请求失败，没有响应头）';
+                    document.getElementById('zyResBody').innerHTML =
+                        '❌ fetch 抛出异常：' + err.message + '\n\n' +
+                        rzy_errHelp(zy_url);
+                    document.getElementById('zyResBody').classList.remove('zy_res-empty');
+                    console.error(err);
+                })
+                .then(function() { zy_btn.disabled = false; });
+        }
+
+        /* ========== 渲染状态条 ========== */
+        function rzy_renderStatus(res, cost) {
+            var bar = document.getElementById('zyStatusBar');
+            var cls = 'zy_ok';
+            if (res.status >= 300 && res.status < 400) cls = 'zy_redirect';
+            if (res.status >= 400) cls = 'zy_err';
+
+            bar.className = 'zy_status-bar ' + cls;
+            bar.innerHTML =
+                '<span><span class="zy_status-code">' + res.status + ' ' + res.statusText + '</span></span>' +
+                '<span class="zy_status-meta">耗时 ' + cost + 'ms · ' +
+                    (res.headers.get('content-length') || '—') + ' bytes · ' +
+                    (res.headers.get('content-type') || '—') +
+                '</span>';
+        }
+
+        /* ========== 错误诊断提示 ========== */
+        function rzy_errHelp(url) {
+            var tips = '\n常见原因排查：\n';
+            if (url.startsWith('file://')) {
+                tips += '  ✗ 你用了 file:// 打开页面\n';
+                tips += '  ✓ 请用 VSCode Live Server 或 python -m http.server\n';
+            }
+            tips += '  • 目标服务器未开启 CORS（浏览器安全限制）\n';
+            tips += '  • 网络断开或域名不存在\n';
+            tips += '  • 被防火墙 / 代理拦截\n';
+            return tips;
+        }
+
+        /* ========== JSON 语法高亮（递归） ========== */
+        function rzy_highlight(obj) {
+            function walk(v, indent) {
+                var sp = '  '.repeat(indent);
+                var ch = '  '.repeat(indent + 1);
+
+                if (v === null) return '<span class="zy_jv-null">null</span>';
+                if (typeof v === 'boolean') return '<span class="zy_jv-bool">' + v + '</span>';
+                if (typeof v === 'number')  return '<span class="zy_jv-number">' + v + '</span>';
+                if (typeof v === 'string')  return '<span class="zy_jv-string">"' + v + '"</span>';
+
+                if (Array.isArray(v)) {
+                    if (!v.length) return '<span class="zy_jv-brace">[]</span>';
+                    var s = '<span class="zy_jv-brace">[</span>\n';
+                    v.forEach(function(x, i) {
+                        s += ch + walk(x, indent + 1);
+                        if (i < v.length - 1) s += ',';
+                        s += '\n';
+                    });
+                    s += sp + '<span class="zy_jv-brace">]</span>';
+                    return s;
+                }
+                if (typeof v === 'object') {
+                    var keys = Object.keys(v);
+                    if (!keys.length) return '<span class="zy_jv-brace">{}</span>';
+                    var s2 = '<span class="zy_jv-brace">{</span>\n';
+                    keys.forEach(function(k, i) {
+                        s2 += ch +
+                            '<span class="zy_jv-key">"' + k + '"</span>' +
+                            '<span class="zy_jv-brace">: </span>' +
+                            walk(v[k], indent + 1);
+                        if (i < keys.length - 1) s2 += ',';
+                        s2 += '\n';
+                    });
+                    s2 += sp + '<span class="zy_jv-brace">}</span>';
+                    return s2;
+                }
+                return String(v);
+            }
+            return walk(obj, 0);
+        }
+    </script>
+</body>
+</html>
