@@ -1,0 +1,613 @@
+<!-- 姓名：荣子祎，日期：2026-11-02，功能：Promise + async 异步流水线演示 — 包饺子 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-6 包饺子异步流水线 - 荣子祎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "Consolas", Arial, sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: #2d3436;
+        }
+
+        .rzy_container { max-width: 1100px; margin: 0 auto; }
+
+        .rzy_header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .rzy_title { font-size: 28px; font-weight: bold; color: #2d3436; margin-bottom: 6px; }
+        .rzy_subtitle { font-size: 14px; color: #636e72; }
+
+        /* ============ 代码卡片 ============ */
+        .rzy_section {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        .rzy_section-title {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .rzy_section-body { padding: 16px 20px; }
+
+        .rzy_code {
+            background: #2d3436;
+            color: #ffeaa7;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: "Consolas", monospace;
+            font-size: 12px;
+            line-height: 1.75;
+            overflow-x: auto;
+            white-space: pre;
+            margin-bottom: 12px;
+        }
+        .zy_c-kw { color: #fd79a8; }
+        .zy_c-fn { color: #74b9ff; }
+        .zy_c-str { color: #55efc4; }
+        .zy_c-cmt { color: #636e72; font-style: italic; }
+
+        /* ============ 控制区 ============ */
+        .zy_controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .zy_btn {
+            padding: 9px 22px;
+            background: linear-gradient(135deg, #00b894, #0984e3);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .zy_btn:hover { box-shadow: 0 4px 14px rgba(9,132,227,0.4); }
+        .zy_btn:active { transform: scale(0.97); }
+        .zy_btn:disabled { background: #b2bec3; cursor: not-allowed; box-shadow: none; }
+        .zy_btn.zy_reset { background: linear-gradient(135deg, #636e72, #2d3436); }
+
+        .zy_total {
+            margin-left: auto;
+            font-size: 14px;
+            font-family: "Consolas", monospace;
+            color: #2d3436;
+        }
+        .zy_total b { color: #d63031; font-size: 18px; }
+
+        /* ============ 流程图 ============ */
+        .zy_flow {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px 14px;
+            overflow-x: auto;
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            min-height: 220px;
+        }
+
+        .zy_col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        /* 节点 */
+        .zy_node {
+            width: 140px;
+            text-align: center;
+            padding: 14px 10px;
+            border-radius: 10px;
+            border: 3px solid #b2bec3;
+            background: #fff;
+            font-size: 13px;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        .zy_node .zy_node-icon { font-size: 26px; margin-bottom: 4px; display: block; }
+        .zy_node .zy_node-name { font-weight: bold; color: #2d3436; }
+        .zy_node .zy_node-time { font-size: 11px; color: #b2bec3; margin-top: 2px; font-family: "Consolas", monospace; }
+        .zy_node .zy_node-tag {
+            position: absolute;
+            top: -10px; left: 50%; transform: translateX(-50%);
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* 状态颜色 */
+        .zy_node.zy_pending {
+            border-color: #b2bec3;
+            background: #fff;
+            color: #b2bec3;
+        }
+        .zy_node.zy_running {
+            border-color: #fdcb6e;
+            background: #fff9e6;
+            box-shadow: 0 0 0 6px rgba(253,203,110,0.25);
+            animation: zy_pulse 1s ease-in-out infinite;
+        }
+        .zy_node.zy_done {
+            border-color: #00b894;
+            background: #e0fffa;
+            box-shadow: 0 2px 10px rgba(0,184,148,0.25);
+        }
+        .zy_node.zy_race { border-style: dashed; }
+        .zy_node.zy_all { border-style: double; border-width: 5px; }
+
+        .zy_node.zy_pending  .zy_node-name { color: #b2bec3; }
+        .zy_node.zy_running  .zy_node-name { color: #d68910; }
+        .zy_node.zy_done     .zy_node-name { color: #00a381; }
+
+        .zy_node.zy_pending  .zy_node-tag { background: #b2bec3; color: #fff; }
+        .zy_node.zy_running  .zy_node-tag { background: #fdcb6e; color: #fff; }
+        .zy_node.zy_done     .zy_node-tag { background: #00b894; color: #fff; }
+
+        @keyframes zy_pulse {
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.03); }
+        }
+
+        /* 箭头 */
+        .zy_arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            min-height: 100px;
+        }
+        .zy_arrow-line {
+            width: 3px;
+            flex: 1;
+            min-height: 20px;
+            background: #b2bec3;
+        }
+        .zy_arrow-head {
+            width: 0; height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 10px solid #b2bec3;
+        }
+        .zy_arrow.zy_running .zy_arrow-line { background: linear-gradient(180deg, #fdcb6e, #00b894); }
+        .zy_arrow.zy_running .zy_arrow-head { border-top-color: #00b894; }
+        .zy_arrow.zy_done .zy_arrow-line { background: #00b894; }
+        .zy_arrow.zy_done .zy_arrow-head { border-top-color: #00b894; }
+
+        /* 并行分叉区 */
+        .zy_parallel {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .zy_parallel .zy_node { width: 130px; }
+
+        /* ============ 日志 ============ */
+        .zy_log {
+            background: #2d3436;
+            color: #dfe6e9;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-family: "Consolas", monospace;
+            font-size: 12px;
+            line-height: 1.8;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .zy_log-line { display: block; }
+        .zy_log-line.zy_start  { color: #74b9ff; }
+        .zy_log-line.zy_done   { color: #55efc4; }
+        .zy_log-line.zy_race   { color: #fdcb6e; }
+        .zy_log-line.zy_all    { color: #a29bfe; }
+        .zy_log-line.zy_info   { color: #b2bec3; font-style: italic; }
+        .zy_log-line.zy_win    { color: #ff7675; font-weight: bold; }
+        .zy_log-ts { color: #636e72; margin-right: 6px; }
+
+        /* ============ 页脚 ============ */
+        .rzy_footer {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+        }
+        .rzy_back {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 7px 20px;
+            background: rgba(255,255,255,0.25);
+            color: #2d3436;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .rzy_back:hover { background: rgba(255,255,255,0.4); }
+
+        @media (max-width: 800px) {
+            .zy_flow { flex-direction: column; align-items: center; }
+            .zy_arrow { flex-direction: row; min-height: auto; padding: 6px 0; }
+            .zy_arrow-line { width: 20px; height: 3px; flex: none; }
+            .zy_arrow-head { border: none; border-left: 10px solid #b2bec3; border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rzy_container">
+        <div class="rzy_header">
+            <h1 class="rzy_title">🥟 包饺子的异步流水线</h1>
+            <div class="rzy_subtitle">Promise.race（买原料二选一）· Promise.all（和面和馅并行）· async/await · setTimeout 模拟</div>
+        </div>
+
+        <!-- 流程图 -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">📊 流程可视化</div>
+            <div class="rzy_section-body">
+                <!-- 控制条 -->
+                <div class="zy_controls">
+                    <button class="zy_btn" id="zyStartBtn" onclick="rzy_run()">▶ 开始流水线</button>
+                    <button class="zy_btn zy_reset" onclick="rzy_reset()">🔄 重置</button>
+                    <div class="zy_total">总耗时：<b id="zyTotal">0</b> ms</div>
+                </div>
+
+                <!-- 流程图 -->
+                <div class="zy_flow" id="zyFlow">
+                    <!-- 买原料（race 分支） -->
+                    <div class="zy_col">
+                        <div class="zy_node zy_pending zy_race" id="zy_race" data-label="Promise.race">
+                            <span class="zy_node-tag">RACE</span>
+                            <span class="zy_node-icon">🛒🛒</span>
+                            <div class="zy_node-name">买原料</div>
+                            <div class="zy_node-time" id="zy_race_t">—</div>
+                        </div>
+                    </div>
+                    <div class="zy_arrow" id="zy_arr_race"><div class="zy_arrow-line"></div><div class="zy_arrow-head"></div></div>
+
+                    <!-- 取原料 -->
+                    <div class="zy_col">
+                        <div class="zy_node zy_pending" id="zy_fetch">
+                            <span class="zy_node-tag">AWAIT</span>
+                            <span class="zy_node-icon">🏃</span>
+                            <div class="zy_node-name">取原料</div>
+                            <div class="zy_node-time" id="zy_fetch_t">—</div>
+                        </div>
+                    </div>
+                    <div class="zy_arrow" id="zy_arr_fetch"><div class="zy_arrow-line"></div><div class="zy_arrow-head"></div></div>
+
+                    <!-- 并行：和面 + 和馅 -->
+                    <div class="zy_col">
+                        <div class="zy_node zy_pending zy_all" id="zy_all" data-label="Promise.all">
+                            <span class="zy_node-tag">ALL</span>
+                            <span class="zy_node-icon">⚡⚡</span>
+                            <div class="zy_node-name">和面 + 和馅（并行）</div>
+                            <div class="zy_node-time" id="zy_all_t">—</div>
+                        </div>
+                    </div>
+                    <div class="zy_arrow" id="zy_arr_all"><div class="zy_arrow-line"></div><div class="zy_arrow-head"></div></div>
+
+                    <!-- 包饺子 -->
+                    <div class="zy_col">
+                        <div class="zy_node zy_pending" id="zy_wrap">
+                            <span class="zy_node-tag">AWAIT</span>
+                            <span class="zy_node-icon">🥟</span>
+                            <div class="zy_node-name">包饺子</div>
+                            <div class="zy_node-time" id="zy_wrap_t">—</div>
+                        </div>
+                    </div>
+                    <div class="zy_arrow" id="zy_arr_wrap"><div class="zy_arrow-line"></div><div class="zy_arrow-head"></div></div>
+
+                    <!-- 煮饺子 -->
+                    <div class="zy_col">
+                        <div class="zy_node zy_pending" id="zy_boil">
+                            <span class="zy_node-tag">AWAIT</span>
+                            <span class="zy_node-icon">🍲</span>
+                            <div class="zy_node-name">煮饺子</div>
+                            <div class="zy_node-time" id="zy_boil_t">—</div>
+                        </div>
+                    </div>
+                    <div class="zy_arrow" id="zy_arr_boil"><div class="zy_arrow-line"></div><div class="zy_arrow-head"></div></div>
+
+                    <!-- 吃饺子 -->
+                    <div class="zy_col">
+                        <div class="zy_node zy_pending" id="zy_eat">
+                            <span class="zy_node-tag">🎉</span>
+                            <span class="zy_node-icon">😋</span>
+                            <div class="zy_node-name">吃饺子</div>
+                            <div class="zy_node-time" id="zy_eat_t">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 代码片段 -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">📝 async / await 源码核心</div>
+            <div class="rzy_section-body">
+                <div class="rzy_code"><span class="zy_c-cmt">// 延迟函数：把 setTimeout 封装成 Promise</span>
+<span class="zy_c-kw">function</span> <span class="zy_c-fn">rzy_delay</span>(ms) {
+    <span class="zy_c-kw">return new</span> <span class="zy_c-fn">Promise</span>(<span class="zy_c-kw">function</span>(resolve) {
+        <span class="zy_c-fn">setTimeout</span>(resolve, ms);
+    });
+}
+
+<span class="zy_c-cmt">// 主流水线（async）</span>
+<span class="zy_c-kw">async function</span> <span class="zy_c-fn">rzy_makeDumplings</span>() {
+    <span class="zy_c-kw">// ① Promise.race：线上 8s vs 线下 6s → 先好的为准</span>
+    <span class="zy_c-kw">var</span> source = <span class="zy_c-kw">await</span> <span class="zy_c-fn">Promise</span>.<span class="zy_c-fn">race</span>([
+        rzy_buyOnline(),    <span class="zy_c-cmt">// 8s</span>
+        rzy_buyOffline()    <span class="zy_c-cmt">// 6s  ← 线下先赢！</span>
+    ]);
+
+    <span class="zy_c-kw">// ② 取原料（同步等 race 完成）</span>
+    <span class="zy_c-kw">await</span> <span class="zy_c-fn">rzy_fetchIngredients</span>();
+
+    <span class="zy_c-kw">// ③ Promise.all：和面 7s + 和馅 5s → 两者都完成才算完（取长 7s）</span>
+    <span class="zy_c-kw">await</span> <span class="zy_c-fn">Promise</span>.<span class="zy_c-fn">all</span>([
+        rzy_makeDough(),    <span class="zy_c-cmt">// 7s</span>
+        rzy_makeFilling()   <span class="zy_c-cmt">// 5s</span>
+    ]);
+
+    <span class="zy_c-kw">// ④ 包饺子 → ⑤ 煮 → ⑥ 吃</span>
+    <span class="zy_c-kw">await</span> <span class="zy_c-fn">rzy_wrap</span>();
+    <span class="zy_c-kw">await</span> <span class="zy_c-fn">rzy_boil</span>();
+    <span class="zy_c-kw">await</span> <span class="zy_c-fn">rzy_eat</span>();
+}</div>
+            </div>
+        </div>
+
+        <!-- 日志 -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">📋 执行日志</div>
+            <div class="rzy_section-body">
+                <div class="zy_log" id="zyLog">（点击上方"开始流水线"查看实时执行过程…）</div>
+            </div>
+        </div>
+
+        <div class="rzy_footer">
+            页面作者：荣子祎 · 2026-11-02
+            <br>
+            <a href="index.html" class="rzy_back">← 返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        /* ========== 延迟 Promise ========== */
+        function rzy_delay(ms) {
+            return new Promise(function(resolve) { setTimeout(resolve, ms); });
+        }
+
+        /* ========== 状态工具 ========== */
+        var zy_raceWin = '';   // race 胜者
+        var zy_totalStart = 0;
+
+        function rzy_log(text, cls) {
+            var el = document.getElementById('zyLog');
+            if (el.textContent === '（点击上方"开始流水线"查看实时执行过程…）') el.innerHTML = '';
+            var t = new Date();
+            var ts = String(t.getHours()).padStart(2,'0') + ':' +
+                     String(t.getMinutes()).padStart(2,'0') + ':' +
+                     String(t.getSeconds()).padStart(2,'0') + '.' +
+                     String(t.getMilliseconds()).padStart(3,'0');
+            var line = document.createElement('span');
+            line.className = 'zy_log-line' + (cls ? ' ' + cls : '');
+            line.innerHTML = '<span class="zy_log-ts">' + ts + '</span>' + text;
+            el.appendChild(line);
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function rzy_setNode(id, state, time) {
+            var n = document.getElementById(id);
+            if (!n) return;
+            n.className = 'zy_node ' + state;
+            if (time !== undefined) {
+                document.getElementById(id + '_t').textContent = (time >= 0 ? '+' : '') + time + 'ms';
+            }
+        }
+
+        function rzy_setArrow(id, state) {
+            var a = document.getElementById(id);
+            if (a) a.className = 'zy_arrow' + (state ? ' ' + state : '');
+        }
+
+        function rzy_nodeTime(id, ms) {
+            document.getElementById(id + '_t').textContent = ms + 'ms';
+        }
+
+        /* ========== 每个动作：带计时 ========== */
+        // ① Promise.race 两个候选人
+        function rzy_buyOnline() {
+            var t0 = Date.now();
+            rzy_log('🛒 线上旗舰店下单原料… (预计 8000ms)', 'zy_race');
+            return new Promise(function(resolve) {
+                setTimeout(function() {
+                    var cost = Date.now() - t0;
+                    rzy_log('  → 线上下单完成  +' + cost + 'ms', 'zy_race');
+                    resolve({ source: '线上', cost: cost });
+                }, 8000);
+            });
+        }
+
+        function rzy_buyOffline() {
+            var t0 = Date.now();
+            rzy_log('🛒 线下菜市场买原料… (预计 6000ms)', 'zy_race');
+            return new Promise(function(resolve) {
+                setTimeout(function() {
+                    var cost = Date.now() - t0;
+                    rzy_log('  → 线下购买完成  +' + cost + 'ms', 'zy_race');
+                    resolve({ source: '线下', cost: cost });
+                }, 6000);
+            });
+        }
+
+        // ② 取原料
+        function rzy_fetchIngredients() {
+            rzy_setNode('zy_fetch', 'zy_running');
+            rzy_setArrow('zy_arr_fetch', 'zy_running');
+            rzy_log('🏃 骑车去菜市场取原料… (3000ms)', 'zy_start');
+            var t0 = Date.now();
+            return rzy_delay(3000).then(function() {
+                var cost = Date.now() - t0;
+                rzy_setNode('zy_fetch', 'zy_done', cost);
+                rzy_setArrow('zy_arr_fetch', 'zy_done');
+                rzy_log('✅ 原料已取回家  +' + cost + 'ms', 'zy_done');
+            });
+        }
+
+        // ③ Promise.all 两个
+        function rzy_makeDough() {
+            rzy_log('🥣 开始和面… (7000ms)', 'zy_all');
+            var t0 = Date.now();
+            return rzy_delay(7000).then(function() {
+                var cost = Date.now() - t0;
+                rzy_log('  ✅ 面团揉好了  +' + cost + 'ms', 'zy_all');
+                return cost;
+            });
+        }
+        function rzy_makeFilling() {
+            rzy_log('🥩 开始剁馅… (5000ms)', 'zy_all');
+            var t0 = Date.now();
+            return rzy_delay(5000).then(function() {
+                var cost = Date.now() - t0;
+                rzy_log('  ✅ 肉馅剁好了  +' + cost + 'ms', 'zy_all');
+                return cost;
+            });
+        }
+
+        // ④ 包饺子
+        function rzy_wrap() {
+            rzy_setNode('zy_wrap', 'zy_running');
+            rzy_setArrow('zy_arr_wrap', 'zy_running');
+            rzy_log('🥟 开始包饺子… (10000ms)', 'zy_start');
+            var t0 = Date.now();
+            return rzy_delay(10000).then(function() {
+                var cost = Date.now() - t0;
+                rzy_setNode('zy_wrap', 'zy_done', cost);
+                rzy_setArrow('zy_arr_wrap', 'zy_done');
+                rzy_log('✅ 全部包完！共 N 个饺子  +' + cost + 'ms', 'zy_done');
+            });
+        }
+
+        // ⑤ 煮饺子
+        function rzy_boil() {
+            rzy_setNode('zy_boil', 'zy_running');
+            rzy_setArrow('zy_arr_boil', 'zy_running');
+            rzy_log('🍲 锅里加水，下饺子… (8000ms)', 'zy_start');
+            var t0 = Date.now();
+            return rzy_delay(8000).then(function() {
+                var cost = Date.now() - t0;
+                rzy_setNode('zy_boil', 'zy_done', cost);
+                rzy_setArrow('zy_arr_boil', 'zy_done');
+                rzy_log('✅ 饺子浮起来啦，关火捞出  +' + cost + 'ms', 'zy_done');
+            });
+        }
+
+        // ⑥ 吃饺子
+        function rzy_eat() {
+            rzy_setNode('zy_eat', 'zy_running');
+            rzy_log('😋 醋碟备好，开吃！ (5000ms)', 'zy_start');
+            var t0 = Date.now();
+            return rzy_delay(5000).then(function() {
+                var cost = Date.now() - t0;
+                rzy_setNode('zy_eat', 'zy_done', cost);
+                rzy_log('🎉 光盘行动！饺子吃完了  +' + cost + 'ms', 'zy_win');
+            });
+        }
+
+        /* ========== 主流水线（async） ========== */
+        async function rzy_makeDumplings() {
+            rzy_log('═════ 流水线启动 ═════', 'zy_info');
+            document.getElementById('zyStartBtn').disabled = true;
+            zy_totalStart = Date.now();
+
+            // ① race：买原料
+            rzy_setNode('zy_race', 'zy_running');
+            rzy_log('⚡ 第 ① 步：Promise.race 同时下单线上 + 线下', 'zy_info');
+            var r1 = rzy_buyOnline();
+            var r2 = rzy_buyOffline();
+            var raceWinner = await Promise.race([r1, r2]);
+
+            zy_raceWin = raceWinner.source;
+            var allDone = await Promise.all([r1, r2]);  // 把慢的那个也等完，拿到所有时间
+            var raceLoser = raceWinner.source === '线上' ? '线下' : '线上';
+            var raceLoserCost = allDone.find(function(x){ return x.source === raceLoser; }).cost;
+
+            rzy_log('🏆 race 胜者：<b>' + raceWinner.source + '</b>  +' + raceWinner.cost + 'ms （' + raceLoser + ' 慢了 +' + raceLoserCost + 'ms）', 'zy_win');
+            rzy_setNode('zy_race', 'zy_done', raceWinner.cost);
+            rzy_setArrow('zy_arr_race', 'zy_done');
+
+            // ② 取原料
+            await rzy_fetchIngredients();
+
+            // ③ Promise.all：和面 + 和馅
+            rzy_setNode('zy_all', 'zy_running');
+            rzy_log('⚡ 第 ③ 步：Promise.all 同时 和面 + 和馅', 'zy_info');
+            rzy_setArrow('zy_arr_all', 'zy_running');
+            var allResults = await Promise.all([rzy_makeDough(), rzy_makeFilling()]);
+            var doughCost = allResults[0];
+            var fillCost  = allResults[1];
+            var allMax = Math.max(doughCost, fillCost);  // 实际总耗时取长的那个
+            rzy_log('🔗 两者都完成！和面 +' + doughCost + 'ms，和馅 +' + fillCost + 'ms，并行节省了 ' + (doughCost + fillCost - allMax) + 'ms', 'zy_all');
+            rzy_setNode('zy_all', 'zy_done', allMax);
+            rzy_setArrow('zy_arr_all', 'zy_done');
+
+            // ④⑤⑥
+            await rzy_wrap();
+            await rzy_boil();
+            await rzy_eat();
+
+            // 汇总
+            var total = Date.now() - zy_totalStart;
+            document.getElementById('zyTotal').textContent = total;
+            rzy_log('═════ 流水线完成 ═════ 总耗时 ' + total + 'ms', 'zy_win');
+            document.getElementById('zyStartBtn').disabled = false;
+        }
+
+        /* ========== 按钮 ========== */
+        function rzy_run() {
+            // 防重入：如果还没完成就再点，啥也不做
+            var zy_eatNode = document.getElementById('zy_eat');
+            if (zy_eatNode.classList.contains('zy_running')) {
+                rzy_log('ℹ️ 流水线还在跑，稍等…', 'zy_info');
+                return;
+            }
+            rzy_makeDumplings();
+        }
+
+        function rzy_reset() {
+            ['zy_race','zy_fetch','zy_all','zy_wrap','zy_boil','zy_eat'].forEach(function(id) {
+                rzy_setNode(id, 'zy_pending');
+            });
+            ['zy_arr_race','zy_arr_fetch','zy_arr_all','zy_arr_wrap','zy_arr_boil'].forEach(function(id) {
+                rzy_setArrow(id, '');
+            });
+            document.getElementById('zyLog').textContent = '（已重置，点击开始按钮重新运行…）';
+            document.getElementById('zyTotal').textContent = '0';
+            document.getElementById('zyStartBtn').disabled = false;
+        }
+    </script>
+</body>
+</html>
