@@ -1,0 +1,500 @@
+<!-- 姓名：荣子祎，日期：2026-11-02，功能：fetch 访问公开 JSON API -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-2 fetch 获取 API 数据 - 荣子祎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: #2d3436;
+        }
+
+        .rzy_container { max-width: 1000px; margin: 0 auto; }
+
+        .rzy_header {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 24px;
+        }
+        .rzy_title { font-size: 28px; font-weight: bold; margin-bottom: 6px; }
+        .rzy_subtitle { font-size: 14px; opacity: 0.85; word-break: break-all; }
+        .rzy_api {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            font-size: 13px;
+            font-family: "Consolas", monospace;
+        }
+
+        .rzy_section {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .rzy_section-title {
+            background: linear-gradient(90deg, #0984e3, #6c5ce7);
+            color: #fff;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .rzy_section-body { padding: 18px 20px; }
+
+        .rzy_code {
+            background: #2d3436;
+            color: #ffeaa7;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            white-space: pre;
+            margin-bottom: 12px;
+        }
+
+        /* ============ 请求按钮区 ============ */
+        .rzy_controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .rzy_btn {
+            padding: 9px 20px;
+            background: #0984e3;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .rzy_btn:hover { background: #0770c2; }
+        .rzy_btn:active { transform: scale(0.97); }
+        .rzy_btn.rzy_btn-alt { background: #00b894; }
+        .rzy_btn.rzy_btn-alt:hover { background: #00a381; }
+        .rzy_btn.rzy_btn-warn { background: #d63031; }
+        .rzy_btn.rzy_btn-warn:hover { background: #b82324; }
+        .rzy_btn:disabled { background: #b2bec3; cursor: not-allowed; }
+
+        .rzy_btn-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+        /* ============ 状态条 ============ */
+        .rzy_status {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-family: "Consolas", monospace;
+        }
+        .rzy_status.rzy_loading  { background: #fff5e1; color: #e17055; border-left: 4px solid #e17055; }
+        .rzy_status.rzy_ok       { background: #e0fffa; color: #00b894; border-left: 4px solid #00b894; }
+        .rzy_status.rzy_err      { background: #ffe0e0; color: #d63031; border-left: 4px solid #d63031; }
+        .rzy_status.rzy_idle     { background: #f0f3fa; color: #636e72; border-left: 4px solid #b2bec3; }
+
+        /* ============ 进度 ============ */
+        .rzy_progress {
+            height: 6px;
+            background: #eef0ff;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .rzy_progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            animation: rzy_shimmer 1.2s linear infinite;
+        }
+        @keyframes rzy_shimmer {
+            0%   { background-position: -200px 0; }
+            100% { background-position: 200px 0; }
+        }
+
+        /* ============ 结果表格 ============ */
+        .rzy_table-wrap {
+            max-height: 480px;
+            overflow-y: auto;
+            border: 1px solid #eef0ff;
+            border-radius: 8px;
+        }
+        .rzy_table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .rzy_table th {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .rzy_table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f5;
+            vertical-align: top;
+        }
+        .rzy_table tr:hover td { background: #f8f9ff; }
+        .rzy_cell-id { color: #667eea; font-weight: bold; text-align: center; width: 50px; }
+        .rzy_cell-user { width: 70px; text-align: center; }
+        .rzy_cell-title { font-weight: 600; color: #2d3436; }
+        .rzy_cell-body { color: #636e72; font-size: 12px; line-height: 1.6; }
+
+        .rzy_user-badge {
+            display: inline-block;
+            width: 26px; height: 26px;
+            line-height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* ============ JSON 查看器 ============ */
+        .rzy_json-box {
+            background: #2d3436;
+            color: #dfe6e9;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-family: "Consolas", monospace;
+            font-size: 12px;
+            line-height: 1.7;
+            max-height: 300px;
+            overflow: auto;
+            white-space: pre;
+        }
+
+        /* ============ 统计卡 ============ */
+        .zy_stats { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+        .zy_stat-card {
+            flex: 1;
+            min-width: 120px;
+            background: linear-gradient(135deg, #eef5ff, #f0ecff);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .zy_stat-num {
+            font-size: 22px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .zy_stat-label { font-size: 12px; color: #636e72; margin-top: 2px; }
+
+        /* ============ 搜索筛选 ============ */
+        .zy_filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .zy_filter input, .zy_filter select {
+            padding: 8px 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+        .zy_filter input:focus, .zy_filter select:focus { border-color: #667eea; }
+
+        .rzy_footer {
+            text-align: center;
+            color: #fff;
+            margin-top: 24px;
+            font-size: 14px;
+        }
+        .rzy_back {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 22px;
+            background: #fff;
+            color: #6c5ce7;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .rzy_back:hover { background: #f0f0f0; }
+
+        @media (max-width: 600px) {
+            body { padding: 14px; }
+            .rzy_title { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rzy_container">
+        <div class="rzy_header">
+            <h1 class="rzy_title">fetch 获取公开 API 数据</h1>
+            <div class="rzy_subtitle">使用原生 fetch 跨域请求 JSONPlaceholder Posts 接口</div>
+            <div class="rzy_api">GET https://jsonplaceholder.typicode.com/posts</div>
+        </div>
+
+        <!-- ========== 请求控制 ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">一、发送请求</div>
+            <div class="rzy_section-body">
+                <div class="rzy_code">// fetch + .then 链写法
+fetch('https://jsonplaceholder.typicode.com/posts')
+  .then(function(res)  { return res.json(); })   // 把响应体解析成 JSON
+  .then(function(data) { console.log(data); })   // data 就是数组
+  .catch(function(err) { console.error(err); });  // 网络/解析错误
+
+// 也可以用 async / await
+async function rzy_load() {
+  var res  = await fetch(url);
+  var data = await res.json();
+}</div>
+
+                <div class="rzy_controls">
+                    <button class="rzy_btn"     id="rzy_btnFetch" onclick="rzy_doFetch()">🚀 发起请求（全部 100 条）</button>
+                    <button class="rzy_btn rzy_btn-alt" onclick="rzy_doFetchOne()">🎯 只取第 1 条 /posts/1</button>
+                    <button class="rzy_btn rzy_btn-alt" onclick="rzy_doFetchUser()">👤 只取用户 1 的 /posts?userId=1</button>
+                    <button class="rzy_btn rzy_btn-warn" onclick="rzy_reset()">清空</button>
+                </div>
+
+                <div class="rzy_progress" id="rzyProgress">
+                    <div class="rzy_progress-bar" id="rzyProgressBar"></div>
+                </div>
+
+                <div class="rzy_status rzy_idle" id="rzyStatus">等待点击按钮发起请求…</div>
+            </div>
+        </div>
+
+        <!-- ========== 统计 ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">二、数据统计</div>
+            <div class="rzy_section-body">
+                <div class="zy_stats">
+                    <div class="zy_stat-card">
+                        <div class="zy_stat-num" id="rzyStatTotal">-</div>
+                        <div class="zy_stat-label">总条数</div>
+                    </div>
+                    <div class="zy_stat-card">
+                        <div class="zy_stat-num" id="rzyStatUser">-</div>
+                        <div class="zy_stat-label">涉及用户数</div>
+                    </div>
+                    <div class="zy_stat-card">
+                        <div class="zy_stat-num" id="rzyStatMs">-</div>
+                        <div class="zy_stat-label">请求耗时 ms</div>
+                    </div>
+                    <div class="zy_stat-card">
+                        <div class="zy_stat-num" id="rzyStatSize">-</div>
+                        <div class="zy_stat-label">响应大小 (KB)</div>
+                    </div>
+                </div>
+
+                <!-- 筛选 -->
+                <div class="zy_filter">
+                    <label>按用户ID：</label>
+                    <select id="zyFilterUser" onchange="zy_renderTable()">
+                        <option value="">全部</option>
+                    </select>
+                    <label>搜索标题：</label>
+                    <input type="text" id="zyFilterTitle" placeholder="输入标题关键词…" oninput="zy_renderTable()">
+                    <label>仅看前</label>
+                    <input type="number" id="zyFilterLimit" value="20" min="1" max="100" style="width:70px;" oninput="zy_renderTable()">
+                    <span>条</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 数据表格 ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">三、数据展示</div>
+            <div class="rzy_section-body">
+                <div class="rzy_table-wrap">
+                    <table class="rzy_table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>用户</th>
+                                <th>标题</th>
+                                <th>正文</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rzyTbody">
+                            <tr><td colspan="4" style="text-align:center;color:#b2bec3;padding:30px;">尚未加载数据</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 原始 JSON ========== -->
+        <div class="rzy_section">
+            <div class="rzy_section-title">四、原始 JSON（前 1 条）</div>
+            <div class="rzy_section-body">
+                <div class="rzy_json-box" id="rzyRawJson">点击上方按钮后这里会显示原始 JSON 数据…</div>
+            </div>
+        </div>
+
+        <div class="rzy_footer">
+            页面作者：荣子祎 · 2026-11-02
+            <br>
+            <a href="index.html" class="rzy_back">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        // 保存当前拿到的数据
+        var rzy_cache = [];
+
+        /* 统一的 fetch 逻辑 */
+        function rzy_fetch(url) {
+            var rzy_btn = document.getElementById('rzy_btnFetch');
+            var rzy_status = document.getElementById('rzyStatus');
+            var rzy_progress = document.getElementById('rzyProgress');
+            var rzy_progress_bar = document.getElementById('rzyProgressBar');
+
+            // UI 切换到 loading
+            rzy_btn.disabled = true;
+            rzy_status.className = 'rzy_status rzy_loading';
+            rzy_status.textContent = '⏳ 正在请求：' + url;
+            rzy_progress.style.display = 'block';
+            rzy_progress_bar.style.width = '30%';
+
+            var rzy_t0 = Date.now();
+
+            fetch(url)
+                .then(function(res) {
+                    rzy_progress_bar.style.width = '80%';
+                    // 检查 HTTP 状态
+                    if (!res.ok) {
+                        throw new Error('HTTP ' + res.status + ' ' + res.statusText);
+                    }
+                    // 读取原始文本大小
+                    return res.text().then(function(txt) {
+                        return { text: txt, json: JSON.parse(txt), size: (txt.length / 1024).toFixed(2) };
+                    });
+                })
+                .then(function(rzy_result) {
+                    var rzy_cost = Date.now() - rzy_t0;
+                    rzy_progress_bar.style.width = '100%';
+
+                    rzy_cache = rzy_result.json;
+                    // 如果是单对象，转成数组统一处理
+                    if (!Array.isArray(rzy_cache)) rzy_cache = [rzy_cache];
+
+                    rzy_status.className = 'rzy_status rzy_ok';
+                    rzy_status.textContent =
+                        '✅ 请求成功！耗时 ' + rzy_cost + 'ms，大小 ' + rzy_result.size + ' KB，共 ' + rzy_cache.length + ' 条数据';
+
+                    document.getElementById('rzyStatTotal').textContent = rzy_cache.length;
+                    document.getElementById('rzyStatUser').textContent  =
+                        new Set(rzy_cache.map(function(x){ return x.userId; })).size;
+                    document.getElementById('rzyStatMs').textContent    = rzy_cost;
+                    document.getElementById('rzyStatSize').textContent = rzy_result.size;
+
+                    // 填充用户筛选器
+                    var rzy_users = Array.from(new Set(rzy_cache.map(function(x){ return x.userId; }))).sort(function(a,b){return a-b;});
+                    var rzy_sel = document.getElementById('zyFilterUser');
+                    rzy_sel.innerHTML = '<option value="">全部</option>';
+                    rzy_users.forEach(function(u) {
+                        rzy_sel.innerHTML += '<option value="' + u + '">用户 ' + u + '</option>';
+                    });
+
+                    // 渲染表格和 JSON
+                    zy_renderTable();
+                    document.getElementById('rzyRawJson').textContent =
+                        JSON.stringify(rzy_cache[0] || rzy_cache, null, 4);
+                })
+                .catch(function(rzy_err) {
+                    var rzy_cost = Date.now() - rzy_t0;
+                    rzy_status.className = 'rzy_status rzy_err';
+                    rzy_status.textContent =
+                        '❌ 请求失败！耗时 ' + rzy_cost + 'ms\n错误信息：' + rzy_err.message +
+                        '\n\n可能原因：\n  • 网络断开\n  • 浏览器 file:// 协议安全限制（请用 http 打开）\n  • 目标服务器无 CORS 响应头';
+                    console.error(rzy_err);
+                })
+                .then(function() {
+                    // 收尾：重新启用按钮，隐藏进度条
+                    rzy_btn.disabled = false;
+                    setTimeout(function() {
+                        rzy_progress.style.display = 'none';
+                        rzy_progress_bar.style.width = '0%';
+                    }, 600);
+                });
+        }
+
+        /* 三个按钮的快捷方式 */
+        function rzy_doFetch() {
+            rzy_fetch('https://jsonplaceholder.typicode.com/posts');
+        }
+        function rzy_doFetchOne() {
+            rzy_fetch('https://jsonplaceholder.typicode.com/posts/1');
+        }
+        function rzy_doFetchUser() {
+            rzy_fetch('https://jsonplaceholder.typicode.com/posts?userId=1');
+        }
+
+        function rzy_reset() {
+            rzy_cache = [];
+            document.getElementById('rzyStatus').className = 'rzy_status rzy_idle';
+            document.getElementById('rzyStatus').textContent = '已清空，等待点击按钮…';
+            document.getElementById('rzyTbody').innerHTML =
+                '<tr><td colspan="4" style="text-align:center;color:#b2bec3;padding:30px;">尚未加载数据</td></tr>';
+            document.getElementById('rzyRawJson').textContent = '已清空…';
+            document.getElementById('rzyStatTotal').textContent = '-';
+            document.getElementById('rzyStatUser').textContent  = '-';
+            document.getElementById('rzyStatMs').textContent    = '-';
+            document.getElementById('rzyStatSize').textContent  = '-';
+        }
+
+        /* 筛选 + 渲染表格 */
+        function zy_renderTable() {
+            if (!rzy_cache.length) return;
+
+            var rzy_user  = document.getElementById('zyFilterUser').value;
+            var rzy_title = document.getElementById('zyFilterTitle').value.trim().toLowerCase();
+            var rzy_limit = parseInt(document.getElementById('zyFilterLimit').value) || 20;
+
+            var rzy_list = rzy_cache.filter(function(item) {
+                if (rzy_user && String(item.userId) !== rzy_user) return false;
+                if (rzy_title && (item.title || '').toLowerCase().indexOf(rzy_title) === -1) return false;
+                return true;
+            }).slice(0, rzy_limit);
+
+            var rzy_html = '';
+            rzy_list.forEach(function(item) {
+                rzy_html += '<tr>' +
+                    '<td class="rzy_cell-id">' + item.id + '</td>' +
+                    '<td class="rzy_cell-user"><span class="rzy_user-badge">U' + item.userId + '</span></td>' +
+                    '<td class="rzy_cell-title">' + (item.title || '—') + '</td>' +
+                    '<td class="rzy_cell-body">' + (item.body || '—') + '</td>' +
+                '</tr>';
+            });
+
+            if (!rzy_list.length) {
+                rzy_html = '<tr><td colspan="4" style="text-align:center;color:#b2bec3;padding:30px;">无匹配结果</td></tr>';
+            }
+            document.getElementById('rzyTbody').innerHTML = rzy_html;
+        }
+    </script>
+</body>
+</html>

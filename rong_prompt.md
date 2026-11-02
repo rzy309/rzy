@@ -45,3 +45,7 @@
 # 2026-11-02-15-36
 # 模型: longcat-2.5-preview-free
 # 提示词: 完成17-1.html，展示json
+
+# 2026-11-02-15-45
+# 模型: longcat-2.5-preview-free
+# 提示词: 完成17-2.html 获取https://jsonplaceholder.typicode.com/posts的数据并提示。接口可以跨域访问。使用fetch和原生代码实现
