@@ -57,3 +57,7 @@
 # 2026-11-02-16-30
 # 模型: longcat-2.5-preview-free
 # 提示词: 完成17-4.html，对远程数据接口进行测试，支持get、post等，显示返回的数据和错误提示信息，示例post接口: https://jsonplaceholder.typicode.com/posts
+
+# 2026-11-02-16-45
+# 模型: longcat-2.5-preview-free
+# 提示词: 完成17-5.html,展示javascript的两种定时器

@@ -1,0 +1,557 @@
+<!-- 姓名：荣子祎，日期：2026-11-02，功能：JavaScript 两种定时器 setTimeout / setInterval -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-5 JavaScript 定时器 - 荣子祎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "Consolas", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: #2d3436;
+        }
+
+        .rzy_container { max-width: 1000px; margin: 0 auto; }
+
+        .rzy_header {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 24px;
+        }
+        .rzy_title { font-size: 28px; font-weight: bold; margin-bottom: 6px; }
+        .rzy_subtitle { font-size: 14px; opacity: 0.85; }
+
+        /* ============ 语法卡片 ============ */
+        .rzy_section {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .rzy_section-title {
+            padding: 14px 20px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .rzy_section-title.zy_setTimeout  { background: linear-gradient(90deg, #00b894, #0984e3); }
+        .rzy_section-title.zy_setInterval { background: linear-gradient(90deg, #d63031, #e17055); }
+
+        .zy_timer-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .rzy_section-body { padding: 18px 20px; }
+
+        .rzy_code {
+            background: #2d3436;
+            color: #ffeaa7;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: "Consolas", monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            white-space: pre;
+            margin-bottom: 12px;
+        }
+
+        .zy_key-diff {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .zy_diff-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .zy_diff-card.zy_t1 { border-color: #00b894; background: #e0fffa; }
+        .zy_diff-card.zy_t2 { border-color: #d63031; background: #ffe0e0; }
+        .zy_diff-card b { font-size: 14px; display: block; margin-bottom: 4px; }
+
+        /* ============ 控制按钮 ============ */
+        .zy_controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .zy_btn {
+            padding: 8px 18px;
+            background: #0984e3;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+        .zy_btn:hover { box-shadow: 0 3px 10px rgba(9, 132, 227, 0.4); }
+        .zy_btn:active { transform: scale(0.97); }
+        .zy_btn:disabled { background: #b2bec3; cursor: not-allowed; box-shadow: none; }
+
+        .zy_btn.zy_btn-green  { background: #00b894; }
+        .zy_btn.zy_btn-green:hover { box-shadow: 0 3px 10px rgba(0, 184, 148, 0.4); }
+        .zy_btn.zy_btn-red    { background: #d63031; }
+        .zy_btn.zy_btn-red:hover { box-shadow: 0 3px 10px rgba(214, 48, 49, 0.4); }
+        .zy_btn.zy_btn-orange { background: #e17055; }
+
+        .zy_input-num {
+            width: 80px;
+            padding: 7px 10px;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            text-align: center;
+        }
+        .zy_input-num:focus { border-color: #667eea; }
+
+        /* ============ 输出区 ============ */
+        .zy_output {
+            background: #f8f9fa;
+            border: 2px dashed #b2bec3;
+            border-radius: 8px;
+            padding: 12px 14px;
+            min-height: 60px;
+            font-family: "Consolas", monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .zy_output.zy_timer1 { border-color: #00b894; color: #00a381; }
+        .zy_output.zy_timer2 { border-color: #d63031; color: #d63031; }
+        .zy_log-line { display: block; }
+        .zy_log-line.zy_new { animation: zy_fadeIn 0.4s ease; }
+        @keyframes zy_fadeIn {
+            from { opacity: 0; transform: translateX(-6px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ============ 综合：倒计时 ============ */
+        .zy_countdown-box {
+            background: linear-gradient(135deg, #2d3436, #1e272e);
+            color: #fff;
+            border-radius: 10px;
+            padding: 24px;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .zy_countdown-label { font-size: 14px; color: #b2bec3; margin-bottom: 10px; }
+        .zy_countdown-display {
+            font-family: "Consolas", monospace;
+            font-size: 64px;
+            font-weight: bold;
+            color: #00b894;
+            line-height: 1.1;
+            letter-spacing: 4px;
+            margin-bottom: 6px;
+        }
+        .zy_countdown-display.zy_paused { color: #b2bec3; }
+        .zy_countdown-display.zy_done   { color: #fdcb6e; animation: zy_pulse 0.6s infinite alternate; }
+        @keyframes zy_pulse {
+            from { transform: scale(1); }
+            to   { transform: scale(1.05); }
+        }
+
+        /* ============ 综合：进度条 ============ */
+        .zy_progress-box { margin-top: 12px; }
+        .zy_progress-track {
+            height: 20px;
+            background: #eef0ff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .zy_progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00b894, #0984e3);
+            border-radius: 10px;
+            transition: width 0.15s linear;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .rzy_footer {
+            text-align: center;
+            color: #fff;
+            margin-top: 24px;
+            font-size: 14px;
+        }
+        .rzy_back {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 7px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .rzy_back:hover { background: rgba(255, 255, 255, 0.25); }
+
+        @media (max-width: 600px) {
+            body { padding: 14px; }
+            .rzy_title { font-size: 22px; }
+            .zy_countdown-display { font-size: 48px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rzy_container">
+        <div class="rzy_header">
+            <h1 class="rzy_title">JavaScript 两种定时器</h1>
+            <div class="rzy_subtitle">setTimeout（一次性）· setInterval（循环）· 荣子祎</div>
+        </div>
+
+        <!-- ============ 一、setTimeout ============ -->
+        <div class="rzy_section">
+            <div class="rzy_section-title zy_setTimeout">
+                一、setTimeout — 一次性定时器
+                <span class="zy_timer-badge">延迟 N 毫秒后执行一次</span>
+            </div>
+            <div class="rzy_section-body">
+                <div class="rzy_code">// 语法：
+var rzy_timerId = setTimeout(function() {
+    console.log('3 秒后只执行这一次');
+}, 3000);
+
+// 清除：取消尚未触发的定时器
+clearTimeout(rzy_timerId);</div>
+
+                <div class="zy_diff-card zy_t1">
+                    <b>🔵 特点</b>
+                    只在"到时间"时触发 <b>一次</b>，然后自动结束。
+                    常用于延迟显示、动画、提示消息。
+                </div>
+
+                <div class="zy_controls">
+                    <label>延迟</label>
+                    <input class="zy_input-num" id="zyTimeoutMs" value="2000" type="number" min="100">
+                    <span>ms</span>
+                    <button class="zy_btn zy_btn-green" onclick="rzy_startTimeout()">▶ 启动 setTimeout</button>
+                    <button class="zy_btn zy_btn-red" onclick="rzy_clearTimeout()">🛑 立即取消</button>
+                    <button class="zy_btn" onclick="rzy_clearTimeoutLog()">🗑 清空日志</button>
+                </div>
+
+                <div class="zy_output zy_timer1" id="zyTimeoutLog">（点击启动按钮试试…）</div>
+            </div>
+        </div>
+
+        <!-- ============ 二、setInterval ============ -->
+        <div class="rzy_section">
+            <div class="rzy_section-title zy_setInterval">
+                二、setInterval — 循环定时器
+                <span class="zy_timer-badge">每隔 N 毫秒反复执行</span>
+            </div>
+            <div class="rzy_section-body">
+                <div class="rzy_code">// 语法：
+var rzy_timerId = setInterval(function() {
+    console.log('每 1 秒打印一次');
+}, 1000);
+
+// 清除：停止循环
+clearInterval(rzy_timerId);</div>
+
+                <div class="zy_diff-card zy_t2">
+                    <b>🔴 特点</b>
+                    每隔固定时间 <b>反复触发</b>，不会自动停止！
+                    记得及时 clearInterval，否则页面会卡爆。
+                </div>
+
+                <div class="zy_controls">
+                    <label>间隔</label>
+                    <input class="zy_input-num" id="zyIntervalMs" value="1000" type="number" min="100">
+                    <span>ms</span>
+                    <button class="zy_btn zy_btn-orange" onclick="rzy_startInterval()">▶ 启动 setInterval</button>
+                    <button class="zy_btn zy_btn-red" onclick="rzy_clearInterval()">🛑 立即停止</button>
+                    <button class="zy_btn" onclick="rzy_clearIntervalLog()">🗑 清空日志</button>
+                </div>
+
+                <div class="zy_output zy_timer2" id="zyIntervalLog">（点击启动按钮试试…）</div>
+            </div>
+        </div>
+
+        <!-- ============ 三、综合练习：倒计时 ============ -->
+        <div class="rzy_section">
+            <div class="rzy_section-title zy_setInterval">
+                三、综合：10 秒倒计时（setInterval 实现）
+                <span class="zy_timer-badge">到达 0 自动 clearInterval</span>
+            </div>
+            <div class="rzy_section-body">
+                <div class="zy_countdown-box">
+                    <div class="zy_countdown-label">倒计时</div>
+                    <div class="zy_countdown-display" id="zyCountdown">10</div>
+                    <div class="zy_controls" style="justify-content:center;margin-top:6px;">
+                        <button class="zy_btn zy_btn-green" onclick="zy_countdownStart()">▶ 开始倒计时</button>
+                        <button class="zy_btn zy_btn-orange" onclick="zy_countdownPause()">⏸ 暂停/继续</button>
+                        <button class="zy_btn zy_btn-red" onclick="zy_countdownReset()">🔄 重置</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ 四、综合练习：进度条 ============ -->
+        <div class="rzy_section">
+            <div class="rzy_section-title zy_setTimeout">
+                四、综合：1~100% 进度条（setInterval + 自增）
+                <span class="zy_timer-badge">到 100% 自动 clearInterval</span>
+            </div>
+            <div class="rzy_section-body">
+                <div class="zy_progress-box">
+                    <div class="zy_progress-track">
+                        <div class="zy_progress-fill" id="zyProgressFill" style="width:0%;">0%</div>
+                    </div>
+                </div>
+                <div class="zy_controls">
+                    <label>每次增长</label>
+                    <input class="zy_input-num" id="zyStep" value="5" type="number" min="1" max="50">
+                    <span>%  /  间隔</span>
+                    <input class="zy_input-num" id="zyStepMs" value="100" type="number" min="20">
+                    <span>ms</span>
+                    <button class="zy_btn zy_btn-green" onclick="zy_progressStart()">▶ 开始</button>
+                    <button class="zy_btn zy_btn-red" onclick="zy_progressStop()">🛑 停止</button>
+                    <button class="zy_btn" onclick="zy_progressReset()">🔄 重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ 五、区别总结 ============ -->
+        <div class="rzy_section">
+            <div class="rzy_section-title" style="background: linear-gradient(90deg, #6c5ce7, #a29bfe);">
+                五、两种定时器对比总结
+            </div>
+            <div class="rzy_section-body">
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#f0f0f5;">
+                                <th style="padding:10px;text-align:left;border-bottom:2px solid #dfe6e9;">对比项</th>
+                                <th style="padding:10px;text-align:left;border-bottom:2px solid #00b894;color:#00a381;">setTimeout</th>
+                                <th style="padding:10px;text-align:left;border-bottom:2px solid #d63031;color:#d63031;">setInterval</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">执行次数</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">执行 <b>1 次</b> 后自动结束</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;"><b>无限循环</b> 直到 clearInterval</td></tr>
+                            <tr><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">清除方法</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">clearTimeout(id)</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">clearInterval(id)</td></tr>
+                            <tr><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">典型用途</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">延迟动画、延时提示</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">倒计时、轮询、时钟</td></tr>
+                            <tr><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">时间误差</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">单次基本无影响</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">长时间会累积漂移</td></tr>
+                            <tr><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">Web Worker 里</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">可用</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0f5;">可用</td></tr>
+                            <tr><td style="padding:8px 10px;">更稳的循环写法</td><td style="padding:8px 10px;">setTimeout 递归调用自己（无漂移）</td><td style="padding:8px 10px;">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="rzy_footer">
+            页面作者：荣子祎 · 2026-11-02
+            <br>
+            <a href="index.html" class="rzy_back">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        /* ================== 一、setTimeout ================== */
+        var rzy_timeoutId = null;
+        var rzy_timeoutCount = 0;
+
+        function rzy_startTimeout() {
+            var rzy_ms = parseInt(document.getElementById('zyTimeoutMs').value) || 2000;
+            var rzy_log = document.getElementById('zyTimeoutLog');
+
+            // 如果有未执行的定时器，先取消
+            if (rzy_timeoutId !== null) clearTimeout(rzy_timeoutId);
+
+            var rzy_start = Date.now();
+            rzy_timeoutCount++;
+            rzy_log.innerHTML =
+                '<span class="zy_log-line zy_new">▶ 【#' + rzy_timeoutCount + '】定时器已启动，' + rzy_ms + ' ms 后执行…</span>';
+
+            rzy_timeoutId = setTimeout(function() {
+                var rzy_cost = Date.now() - rzy_start;
+                rzy_log.innerHTML +=
+                    '<span class="zy_log-line zy_new">✅ 【#' + rzy_timeoutCount + '】已触发！预定 ' + rzy_ms + ' ms，实际 ' + rzy_cost + ' ms</span>';
+                rzy_timeoutId = null;
+            }, rzy_ms);
+        }
+
+        function rzy_clearTimeout() {
+            if (rzy_timeoutId !== null) {
+                clearTimeout(rzy_timeoutId);
+                document.getElementById('zyTimeoutLog').innerHTML +=
+                    '<span class="zy_log-line zy_new">🛑 已手动取消（定时器 #' + rzy_timeoutCount + ' 尚未触发）</span>';
+                rzy_timeoutId = null;
+            } else {
+                document.getElementById('zyTimeoutLog').innerHTML +=
+                    '<span class="zy_log-line">ℹ️ 当前没有待执行的 setTimeout</span>';
+            }
+        }
+
+        function rzy_clearTimeoutLog() {
+            document.getElementById('zyTimeoutLog').textContent = '（日志已清空）';
+        }
+
+        /* ================== 二、setInterval ================== */
+        var rzy_intervalId = null;
+        var rzy_intervalCount = 0;
+
+        function rzy_startInterval() {
+            if (rzy_intervalId !== null) {
+                document.getElementById('zyIntervalLog').innerHTML +=
+                    '<span class="zy_log-line">ℹ️ 已有定时器在运行，先停止再启动</span>';
+                return;
+            }
+            var rzy_ms = parseInt(document.getElementById('zyIntervalMs').value) || 1000;
+            var rzy_log = document.getElementById('zyIntervalLog');
+
+            rzy_intervalCount = 0;
+            rzy_log.innerHTML =
+                '<span class="zy_log-line zy_new">▶ setInterval 启动，间隔 ' + rzy_ms + ' ms</span>';
+
+            rzy_intervalId = setInterval(function() {
+                rzy_intervalCount++;
+                var d = new Date();
+                var hh = String(d.getHours()).padStart(2, '0');
+                var mm = String(d.getMinutes()).padStart(2, '0');
+                var ss = String(d.getSeconds()).padStart(2, '0');
+                rzy_log.innerHTML +=
+                    '<span class="zy_log-line zy_new">🔁 第 ' + rzy_intervalCount + ' 次触发 → ' + hh + ':' + mm + ':' + ss + '</span>';
+                rzy_log.scrollTop = rzy_log.scrollHeight;
+
+                // 演示：执行到 10 次自动停
+                if (rzy_intervalCount >= 10) {
+                    clearInterval(rzy_intervalId);
+                    rzy_intervalId = null;
+                    rzy_log.innerHTML += '<span class="zy_log-line">🛑 自动停止（已达 10 次上限，避免刷爆）</span>';
+                }
+            }, rzy_ms);
+        }
+
+        function rzy_clearInterval() {
+            if (rzy_intervalId !== null) {
+                clearInterval(rzy_intervalId);
+                document.getElementById('zyIntervalLog').innerHTML +=
+                    '<span class="zy_log-line zy_new">🛑 已手动停止 setInterval（共触发 ' + rzy_intervalCount + ' 次）</span>';
+                rzy_intervalId = null;
+            }
+        }
+
+        function rzy_clearIntervalLog() {
+            document.getElementById('zyIntervalLog').textContent = '（日志已清空）';
+        }
+
+        /* ================== 三、倒计时 ================== */
+        var zy_cdIntervalId = null;
+        var zy_cdValue = 10;
+
+        function zy_countdownStart() {
+            if (zy_cdIntervalId !== null) return;
+            var el = document.getElementById('zyCountdown');
+            el.classList.remove('zy_paused', 'zy_done');
+            el.textContent = zy_cdValue;
+
+            zy_cdIntervalId = setInterval(function() {
+                zy_cdValue--;
+                el.textContent = zy_cdValue;
+                if (zy_cdValue <= 0) {
+                    clearInterval(zy_cdIntervalId);
+                    zy_cdIntervalId = null;
+                    el.classList.add('zy_done');
+                    el.textContent = '🎉 Go!';
+                }
+            }, 1000);
+        }
+
+        function zy_countdownPause() {
+            if (zy_cdIntervalId !== null) {
+                clearInterval(zy_cdIntervalId);
+                zy_cdIntervalId = null;
+                document.getElementById('zyCountdown').classList.add('zy_paused');
+            } else {
+                // 恢复
+                zy_countdownStart();
+            }
+        }
+
+        function zy_countdownReset() {
+            if (zy_cdIntervalId !== null) {
+                clearInterval(zy_cdIntervalId);
+                zy_cdIntervalId = null;
+            }
+            zy_cdValue = 10;
+            var el = document.getElementById('zyCountdown');
+            el.classList.remove('zy_paused', 'zy_done');
+            el.textContent = '10';
+        }
+
+        /* ================== 四、进度条 ================== */
+        var zy_progId = null;
+        var zy_prog = 0;
+
+        function zy_progressStart() {
+            if (zy_progId !== null) return;
+            var zy_step = parseInt(document.getElementById('zyStep').value) || 5;
+            var zy_stepMs = parseInt(document.getElementById('zyStepMs').value) || 100;
+            var fill = document.getElementById('zyProgressFill');
+
+            zy_progId = setInterval(function() {
+                zy_prog += zy_step;
+                if (zy_prog >= 100) {
+                    zy_prog = 100;
+                    fill.style.width = '100%';
+                    fill.textContent = '100% ✅';
+                    clearInterval(zy_progId);
+                    zy_progId = null;
+                    return;
+                }
+                fill.style.width = zy_prog + '%';
+                fill.textContent = zy_prog + '%';
+            }, zy_stepMs);
+        }
+
+        function zy_progressStop() {
+            if (zy_progId !== null) {
+                clearInterval(zy_progId);
+                zy_progId = null;
+            }
+        }
+
+        function zy_progressReset() {
+            zy_progressStop();
+            zy_prog = 0;
+            var fill = document.getElementById('zyProgressFill');
+            fill.style.width = '0%';
+            fill.textContent = '0%';
+        }
+    </script>
+</body>
+</html>
